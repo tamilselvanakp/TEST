@@ -8,11 +8,14 @@ import java.sql.Types;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
+
 import com.exception.handler.CustomException;
 
 import oracle.jdbc.OracleTypes;
 
 public class GetSubscriberDate {
+	static Logger log = Logger.getLogger(GetSubscriberDate.class.getName());
 	String resultopxml;
 	CustomException o_customexception = new CustomException();
 
@@ -20,15 +23,15 @@ public class GetSubscriberDate {
 			String TransRefId, String BulkTransRef) {
 		try {
 
-			System.out.println(" IP p_request_type" + p_request_type);
-			// System.out.println(" IP XML_input" + XML_input);
-			// System.out.println(" IP User" + User);
-			// System.out.println(" IP TransRefId" + TransRefId);
-			// System.out.println(" IP BulkTransRef" + BulkTransRef);
+			log.debug(" IP p_request_type" + p_request_type);
+			// log.debug(" IP XML_input" + XML_input);
+			// log.debug(" IP User" + User);
+			// log.debug(" IP TransRefId" + TransRefId);
+			// log.debug(" IP BulkTransRef" + BulkTransRef);
 
 			CallableStatement l_clable = l_conn.prepareCall(
 					"{call hlr_pkg_xml_request.mboss_iface(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
-			System.out.println("CallableStatement ");
+			log.debug("CallableStatement ");
 			l_clable.setString(1, p_request_type);
 			l_clable.setString(2, XML_input);
 			l_clable.setString(3, User);
@@ -69,15 +72,15 @@ public class GetSubscriberDate {
 			l_clable.registerOutParameter(27, Types.VARCHAR);// p_log_message
 
 			Boolean execte = l_clable.execute();
-			System.out.println("Is Procedure Called " + execte);
+			log.debug("Is Procedure Called " + execte);
 			;
 
-			/*System.out.println(
+			/*log.debug(
 					"p_xml_cur_count  p_xml_response p_subs_identity_imsi p_subs_identity_msisdn p_subs_identity_flag");
 			
 			System.out.print(" p_free_format_tdr_data p_continue_op_code \n");*/
 
-			System.out.println("Result is" + l_clable.getInt(6));
+			log.debug("Result is" + l_clable.getInt(6));
 			if (l_clable.getString(8) != null) {
 				resultopxml = "<" + p_request_type + "_RESPONSE>" + l_clable.getString(8) + "</" + p_request_type
 						+ "_RESPONSE>";
@@ -91,20 +94,20 @@ public class GetSubscriberDate {
 						+ p_request_type + "_RESPONSE>";
 
 			}
-			System.out.println("XML Response [" + resultopxml + "]");
+			log.debug("XML Response [" + resultopxml + "]");
 
-			System.out.println("TDR data  is [" + l_clable.getString(12) + "]");
+			log.debug("TDR data  is [" + l_clable.getString(12) + "]");
 			if (l_clable.getString(17) != null) {
 
-				System.out.println("Trap code data  is [" + l_clable.getString(17) + "]");
+				log.debug("Trap code data  is [" + l_clable.getString(17) + "]");
 
-				System.out.println("Trap desc  is [" + l_clable.getString(18) + "]");
+				log.debug("Trap desc  is [" + l_clable.getString(18) + "]");
 			}
-			System.out.println("error log is [" + l_clable.getString(27) + "]");
+			log.debug("error log is [" + l_clable.getString(27) + "]");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-			System.out.println("Custom response called");
+			log.debug("Custom response called");
 			Response e_response = o_customexception.riseexception("EXCEPTION WHILE PROCESSING", 400, e.getMessage());
 
 			throw new WebApplicationException(e_response);

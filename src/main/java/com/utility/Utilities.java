@@ -6,11 +6,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
 
+import org.apache.log4j.Logger;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class Utilities {
+	static Logger log = Logger.getLogger(Utilities.class.getName());
 
 	public static boolean isnumber(String checkString) {
 		if (checkString.matches("[0-9]+"))
@@ -22,11 +25,11 @@ public class Utilities {
 
 	/*	public static boolean isInRange(int startRange, int endrange, int testNumber) {
 			if ((testNumber < startRange) || (testNumber > endrange)) {
-				System.out.println(
+				log.debug(
 						"startRange [" + startRange + "] endrange [" + endrange + "] testnumber [" + testNumber + "]");
 				return false;
 			} else {
-				System.out.println(
+				log.debug(
 						"startRange [" + startRange + "] endrange [" + endrange + "] testnumber [" + testNumber + "]");
 				return true;
 			}
@@ -45,17 +48,17 @@ public class Utilities {
 			if (startRange + 1 == endrange) {
 
 				if ((testNumber == startRange) || (testNumber == endrange)) {
-					System.out.println("Start and end range diff is 1 so return true startRange [" + startRange
-							+ "] endrange [" + endrange + "] testnumber [" + testNumber + "]");
+					log.debug("Start and end range diff is 1 so return true startRange [" + startRange + "] endrange ["
+							+ endrange + "] testnumber [" + testNumber + "]");
 					return true;
 				}
 			}
 
-			System.out.println("False startRange [" + startRange + "] endrange [" + endrange + "] testnumber ["
-					+ testNumber + "]");
+			log.debug("False startRange [" + startRange + "] endrange [" + endrange + "] testnumber [" + testNumber
+					+ "]");
 			return false;
 		} else {
-			System.out.println(
+			log.debug(
 					"True startRange [" + startRange + "] endrange [" + endrange + "] testnumber [" + testNumber + "]");
 			return true;
 		}
@@ -71,12 +74,12 @@ public class Utilities {
 			l_intarrayB[i] = int2str.charAt(i) - '0';
 		}
 		for (int o : l_intarrayB) {
-			System.out.println(" newGuess index  value" + o);
+			log.debug(" newGuess index  value" + o);
 		}
-		System.out.println("arr length" + arr.length + "b length" + l_intarrayB);
+		log.debug("arr length" + arr.length + "b length" + l_intarrayB);
 		int lenarrA = arr.length;
 		int lenarrB = l_intarrayB.length;
-		System.out.println();
+		log.debug("\n");
 		int temp = 1;
 		for (int i = 0; i < l_intarrayB.length; i++) {
 			System.out.print("] Arreay value A [" + arr[lenarrA - temp]);
@@ -91,7 +94,7 @@ public class Utilities {
 
 		}
 
-		System.out.println("Length return is" + numberhole1);
+		log.debug("Length return is" + numberhole1);
 		return numberhole1;
 
 	}
@@ -99,9 +102,9 @@ public class Utilities {
 	public static Formatter getRequestLenthin9digit(int length) {
 
 		Formatter l_formater = new Formatter();
-		System.out.println("Length Before :" + length);
+		log.debug("Length Before :" + length);
 		l_formater.format("%09d", length);
-		System.out.println("Length after :" + l_formater);
+		log.debug("Length after :" + l_formater);
 		return l_formater;
 
 	}
@@ -110,7 +113,7 @@ public class Utilities {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		Date date = new Date();
 		String l_currentDateTime = dateFormat.format(date);
-		System.out.println(l_currentDateTime);
+		log.debug(l_currentDateTime);
 		return l_currentDateTime;
 	}
 
@@ -126,12 +129,12 @@ public class Utilities {
 			// Checking key value in map in obj map
 			l_mapKey = o_JsonobjRootNode.get(l_mapVlaue);
 			if (l_mapKey instanceof JsonObject) {
-				System.out.println("Header: " + l_mapKey);
+				log.debug("Header: " + l_mapKey);
 				// calling tcp connector when it is has been the object of
 				// instances
 				Utilities.jsonParserNoReturn(l_mapKey.toString());
 			} else {
-				System.out.println("key: " + l_mapVlaue + " value: " + l_mapKey);
+				log.debug("key: " + l_mapVlaue + " value: " + l_mapKey);
 
 			}
 		}
@@ -153,22 +156,21 @@ public class Utilities {
 
 				if (l_mapVlaue.equalsIgnoreCase(value)) {
 
-					System.out.println("Comparing \"" + value + "\" with key: " + l_mapVlaue + " Map value: "
+					log.debug("Comparing \"" + value + "\" with key: " + l_mapVlaue + " Map value: "
 							+ l_mapKey.toString() + " is Json Elemnt with child node ");
 					retrnVar = l_mapKey;
 					l_mapKey = null;
 
 				} else {
-					// System.out.println("Header: " + l_mapKey);
+					// log.debug("Header: " + l_mapKey);
 					Utilities.jsonParserWithParitcularElement(l_mapKey.toString(), value);
 				}
 
 			} else {
 
 				if (l_mapVlaue.equalsIgnoreCase(value)) {
-					System.out.println("keystr is " + l_mapVlaue);
-					System.out.println(
-							"Comparing \"" + value + "\" with key: " + l_mapVlaue + " value: " + l_mapKey.toString());
+					log.debug("keystr is " + l_mapVlaue);
+					log.debug("Comparing \"" + value + "\" with key: " + l_mapVlaue + " value: " + l_mapKey.toString());
 					retrnVar = l_mapKey.toString();
 					l_mapKey = null;
 					break;
@@ -190,7 +192,7 @@ public class Utilities {
 		// +positive 1 response will get
 
 		// both are equal 0 will come
-		System.out.println(
+		log.debug(
 				"Comapring date Received Date1 [" + received_Date1 + "] with Received Date2 [" + received_Date2 + "]");
 
 		return received_Date1.compareTo(received_Date2);

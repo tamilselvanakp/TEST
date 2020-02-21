@@ -17,7 +17,10 @@ import javax.xml.soap.SOAPPart;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import org.apache.log4j.Logger;
+
 public class SoapXmlFormater {
+	static Logger log = Logger.getLogger(SoapXmlFormater.class.getName());
 	public static String Prefix = "ns";
 
 	private static SOAPMessage getEnvelop(String soapprefix) throws SOAPException {
@@ -38,7 +41,7 @@ public class SoapXmlFormater {
 		Name bodyName;
 		bodyName = soapFactory.createName(BodyelementName);
 
-		System.out.println("Framing API for :" + BodyelementName);
+		log.debug("Framing API for :" + BodyelementName);
 
 		SOAPBodyElement apiBody = saopBody.addBodyElement(bodyName);
 		// saopBody.addChildElement("v9:SomeElement");
@@ -49,7 +52,7 @@ public class SoapXmlFormater {
 
 	private static SOAPMessage getsoapbody(String prefix, String apiName) throws SOAPException {
 
-		System.out.println("prefix [" + prefix + "] apiName [" + apiName + "]");
+		log.debug("prefix [" + prefix + "] apiName [" + apiName + "]");
 		SOAPMessage message = SoapXmlFormater.getEnvelop(prefix);
 		SOAPEnvelope soapEnvelope = message.getSOAPPart().getEnvelope();
 
@@ -58,18 +61,18 @@ public class SoapXmlFormater {
 		header.setPrefix(prefix);
 
 		SOAPBody saopBody = soapEnvelope.getBody();
-		System.out.println("soap message created");
+		log.debug("soap message created");
 		saopBody.setPrefix(prefix);
 		saopBody.removeNamespaceDeclaration(saopBody.getPrefix());
 
-		/*	System.out.println("Creating body header [" + bodyHeaderName + "]");
+		/*	log.debug("Creating body header [" + bodyHeaderName + "]");
 			Name BodyHeadern = soapFactory.createName(bodyHeaderName);
 			saopBody.addBodyElement(BodyHeadern).setPrefix(apiPrefix);*/
 
 		/*Name bodyName;
 		bodyName = soapFactory.createName(apiName);
 		
-		System.out.println("Framing API for :" + apiName);
+		log.debug("Framing API for :" + apiName);
 		
 		SOAPBodyElement apiBody = saopBody.addBodyElement(bodyName);
 		// saopBody.addChildElement("v9:SomeElement");
@@ -82,13 +85,13 @@ public class SoapXmlFormater {
 
 	private static SOAPElement setchildForBodyElement(SOAPBodyElement Bodyelement, String childName, String Value)
 			throws SOAPException {
-		System.out.println("Adding element \"" + childName + "\" with value : [" + Value + "]");
+		log.debug("Adding element \"" + childName + "\" with value : [" + Value + "]");
 		return Bodyelement.addChildElement(childName).addTextNode(Value);
 	}
 
 	private static SOAPElement setchildElementForElement(SOAPElement Bodyelement, String childName, String Value)
 			throws SOAPException {
-		System.out.println("Adding element \"" + childName + "\" with value : [" + Value + "]");
+		log.debug("Adding element \"" + childName + "\" with value : [" + Value + "]");
 		return Bodyelement.addChildElement(childName).addTextNode(Value);
 	}
 
@@ -125,7 +128,7 @@ public class SoapXmlFormater {
 		SOAPElement tranDateTime = setchildElementForElement(l_requestheader, "tranDateTime",
 				Utilities.getCurrentDateTime());
 
-		// System.out.println("Filling data : " + senderID.getLocalName() + " :
+		// log.debug("Filling data : " + senderID.getLocalName() + " :
 		// " + senderID.getTextContent() + ","
 		// + callBackLocation.getLocalName() + " : " +
 		// callBackLocation.getTextContent() + " , tranDateTime :"
@@ -162,7 +165,7 @@ public class SoapXmlFormater {
 			SOAPElement l_marketZip = setchildElementForElement(l_updateSubscriberDetailele, "marketZip", marketZip);
 
 		} else {
-			System.err.println("!!!!!!!!!! \"action\" should belongs to updateSubscriberDetailsRequestV3 ");
+			log.error("!!!!!!!!!! \"action\" should belongs to updateSubscriberDetailsRequestV3 ");
 			return null;
 		}
 		l_message.saveChanges();
@@ -171,7 +174,7 @@ public class SoapXmlFormater {
 		l_message.writeTo(l_byteArrayOutputStream);
 		String result = l_byteArrayOutputStream.toString();
 
-		System.out.println("Sopamsg [" + result + "]");
+		log.debug("Sopamsg [" + result + "]");
 		l_byteArrayOutputStream.close();
 		return result;
 	}

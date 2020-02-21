@@ -8,7 +8,10 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
+
 public class HttpClient {
+	static Logger log = Logger.getLogger(HttpClient.class.getName());
 
 	public static String sendHttpRequest(String url, String request) {
 
@@ -16,19 +19,19 @@ public class HttpClient {
 		Client l_hhtpclient = ClientBuilder.newClient();
 
 		String l_form = String.format("Connecting to server [%s].....", url);
-		System.out.println(l_form);
+		log.debug(l_form);
 		WebTarget l_destinationServercon = l_hhtpclient.target(url);
 		Invocation.Builder l_Builder = l_destinationServercon.request(MediaType.APPLICATION_XML);
 		// Invocation.Builder l_Builder =
 		// l_WebTarget.request(MediaType.APPLICATION_JSON);
-		System.out.println("Request sent to server");
+		log.debug("Request sent to server");
 
 		Response l_Tmoresponse = l_Builder.post(Entity.entity(request, MediaType.APPLICATION_XML));
-		System.out.println("Waiting for the response from server......");
+		log.debug("Waiting for the response from server......");
 		String result = l_Tmoresponse.readEntity(String.class);
 		String frm = String.format("Response received with length [%d] and response is [%s].....", result.length(),
 				result);
-		System.out.println(frm);
+		log.debug(frm);
 
 		l_Tmoresponse.close();
 		return result;

@@ -8,6 +8,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.log4j.Logger;
+
 import com.dob.base.GetauthTokenDob;
 import com.exception.handler.ErrorMsgClass;
 import com.utility.Secured;
@@ -15,6 +17,7 @@ import com.utility.Secured;
 @Provider
 @Secured
 public class AuthenticationFilter implements ContainerRequestFilter {
+	static Logger log = Logger.getLogger(AuthenticationFilter.class.getName());
 	private static final String AUTHENTICATION_SCHEME = "Token :";
 	String Uri = "www.abcd.com";
 
@@ -27,12 +30,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		} catch (Exception e) {
 			TokenNotPresent(requestContext, l_authorizationHeader);
 		}
-		System.out.println("l_authorizationHeader[" + l_authorizationHeader + "]");
+		log.debug("l_authorizationHeader[" + l_authorizationHeader + "]");
 		if (checkAuthtokenisvalidformate(l_authorizationHeader) == true) {
-			System.out.println("Valid formate Auth token");
+			log.debug("Valid formate Auth token");
 			String[] auth_token = l_authorizationHeader.split(":");
 			String strAuthToken = auth_token[auth_token.length - 1].trim();
-			System.out.println("Received Auth token length is [" + strAuthToken.length() + "] and token is ["
+			log.debug("Received Auth token length is [" + strAuthToken.length() + "] and token is ["
 					+ strAuthToken + "]");
 			if (isvalidauthToken(strAuthToken) == true) {
 		
@@ -40,7 +43,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		
 			}
 		} else {
-			System.out.println("Received invalidTokenFormate");
+			log.debug("Received invalidTokenFormate");
 			invalidTokenFormate(requestContext, l_authorizationHeader);
 			return;
 		}*/
@@ -55,20 +58,20 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		} catch (Exception e) {
 			TokenNotPresent(requestContext, l_authorizationHeader);
 		}
-		System.out.println("l_authorizationHeader[" + l_authorizationHeader + "]");
+		log.debug("l_authorizationHeader[" + l_authorizationHeader + "]");
 		if (checkAuthtokenisvalidformate(l_authorizationHeader) == true) {
-			System.out.println("Valid formate Auth token [" + Thread.currentThread().getName() + "]");
+			log.debug("Valid formate Auth token [" + Thread.currentThread().getName() + "]");
 			String[] auth_token = l_authorizationHeader.split(":");
 			String strAuthToken = auth_token[auth_token.length - 1].trim();
-			System.out.println("Received Auth token length is [" + strAuthToken.length() + "] and token is ["
-					+ strAuthToken + "]");
+			log.debug("Received Auth token length is [" + strAuthToken.length() + "] and token is [" + strAuthToken
+					+ "]");
 			if (isvalidauthToken(strAuthToken) == true) {
 
 			} else {
 
 			}
 		} else {
-			System.out.println("Received invalidTokenFormate");
+			log.debug("Received invalidTokenFormate");
 			invalidTokenFormate(requestContext, l_authorizationHeader);
 			return;
 		}

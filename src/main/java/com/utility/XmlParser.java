@@ -11,6 +11,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.log4j.Logger;
 import org.glassfish.jersey.internal.guava.HashMultimap;
 import org.glassfish.jersey.internal.guava.Multimap;
 import org.w3c.dom.Document;
@@ -22,20 +23,21 @@ import org.xml.sax.InputSource;
 import com.exception.handler.CustomException;
 
 public class XmlParser {
+	static Logger log = Logger.getLogger(XmlParser.class.getName());
 	static CustomException o_customexception = new CustomException();
 
 	public Document Parser_xml(String xml_body) {
 		Document document = null;
 
 		if (xml_body.length() == 0 || xml_body.equals("")) {
-			System.out.println("XML should not be a null value");
+			log.debug("XML should not be a null value");
 			Response e_response = o_customexception.riseexception("Body should not be null", 400,
 					"Recevived body null");
 
 			throw new WebApplicationException(e_response);
 		}
 
-		// System.out.println("Inside Parser_xml["+xml_body+"]");
+		// log.debug("Inside Parser_xml["+xml_body+"]");
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
@@ -65,21 +67,21 @@ public class XmlParser {
 
 		// Here comes the root node
 		Element root = document.getDocumentElement();
-		// System.out.println(root.getNodeName());
-		// System.out.println("document"+document.getNodeValue());
-		// System.out.println("Root element :" +
+		// log.debug(root.getNodeName());
+		// log.debug("document"+document.getNodeValue());
+		// log.debug("Root element :" +
 		// document.getDocumentElement());
 		String name = root.getLocalName();
-		// System.out.println("Root Elemenmt Name is ["+name+"]");
-		System.out.println("Root Elemenmt Name is [" + name + "]");
+		// log.debug("Root Elemenmt Name is ["+name+"]");
+		log.debug("Root Elemenmt Name is [" + name + "]");
 
-		// System.out.println("1st child element :" +
+		// log.debug("1st child element :" +
 		// document.getChildNodes());
 		NodeList nodes = document.getElementsByTagName("*");
 
 		if (nodes.getLength() == 0) {
 
-			System.out.println("Nodes are empty" + nodes);
+			log.debug("Nodes are empty" + nodes);
 		}
 
 		else {
@@ -87,22 +89,22 @@ public class XmlParser {
 			for (int i = 0; i < nodes.getLength(); i++) {
 
 				Node l_crnt_node = nodes.item(i);
-				// System.out.println("\nCurrent Element :" +
+				// log.debug("\nCurrent Element :" +
 				// nodes.item(i).getNodeName());
 				if (l_crnt_node.getNodeType() == Node.ELEMENT_NODE) {
 					if (l_crnt_node.getLocalName().contains("BODY")) {
-						System.out.println("BODY found continued");
+						log.debug("BODY found continued");
 						continue;
 					}
 					if (l_crnt_node.getLocalName().contains("HEADER")) {
-						System.out.println("HEADER found continued");
+						log.debug("HEADER found continued");
 						continue;
 					}
 
 					// verify the tag has c
 					if (l_crnt_node.getChildNodes().getLength() > 1) {
 						/*
-						 * System.out.println("Node  [" +
+						 * log.debug("Node  [" +
 						 * l_crnt_node.getLocalName() +
 						 * "] has child nodes [" +
 						 * l_crnt_node.getChildNodes().getLength() +
@@ -112,7 +114,7 @@ public class XmlParser {
 					}
 					// findind the values from map
 					/*
-					 * System.out.println("Key:[" +
+					 * log.debug("Key:[" +
 					 * l_crnt_node.getLocalName().trim() + "] Value [" +
 					 * l_crnt_node.getTextContent().trim() + "]");
 					 */
@@ -123,7 +125,7 @@ public class XmlParser {
 		}
 
 		/*} catch (Exception e) {
-			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!Exception!!!!!!!!!!!!!!!!!!!!");
+			log.debug("!!!!!!!!!!!!!!!!!!!!!!!Exception!!!!!!!!!!!!!!!!!!!!");
 			e.printStackTrace();
 			Response e_response = o_customexception.riseexception(e.getMessage(), 400, "Error while Processing XML");
 		
@@ -136,11 +138,11 @@ public class XmlParser {
 	public String get_node_to_attribute(NodeList l_attrnodelst, String attribute_Name) {
 		String l_renAttributeStr = "";
 		if (l_attrnodelst.getLength() != 0) {
-			// System.out.println("NodeList length is not empty , continue");
+			// log.debug("NodeList length is not empty , continue");
 
 			for (int i = 0; i < l_attrnodelst.getLength(); i++) {
 				Node l_crrntNode = l_attrnodelst.item(i);
-				// System.out.println("\nCurrent Element :" +
+				// log.debug("\nCurrent Element :" +
 				// l_crrntNode.getNodeName());
 
 				if (l_crrntNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -148,20 +150,20 @@ public class XmlParser {
 					Element Lcrnt_attrinode_Element = (Element) l_crrntNode;
 
 					if (Lcrnt_attrinode_Element != null) {
-						System.out.println(" current attribute node Element is Not null");
+						log.debug(" current attribute node Element is Not null");
 					}
 
-					// System.out.println("\nCurrent ENTITY_NODE :"
+					// log.debug("\nCurrent ENTITY_NODE :"
 					// +Lcrnt_node_Element+" :
 					// "+Lcrnt_node_Element.getElementsByTagName(Element_Name).item(0).getTextContent());
 					try {
 						l_renAttributeStr = Lcrnt_attrinode_Element.getAttribute(attribute_Name);
 						if (l_renAttributeStr.isEmpty()) {
-							System.out.println("Retrived Attribute [" + attribute_Name + "] is Empty");
+							log.debug("Retrived Attribute [" + attribute_Name + "] is Empty");
 							return null;
 						}
 					} catch (NullPointerException nullpo) {
-						System.out.println("Null value in given attribute_Name [" + attribute_Name + "] so returning");
+						log.debug("Null value in given attribute_Name [" + attribute_Name + "] so returning");
 						return "";
 					}
 
@@ -177,11 +179,11 @@ public class XmlParser {
 	public String get_NodeList_to_elemet(NodeList l_nodelst, String Element_Name) {
 		String l_renStr = "";
 		if (l_nodelst.getLength() != 0) {
-			// System.out.println("NodeList length is not empty , continue");
+			// log.debug("NodeList length is not empty , continue");
 
 			for (int i = 0; i < l_nodelst.getLength(); i++) {
 				Node l_crrntNode = l_nodelst.item(i);
-				// System.out.println("\nCurrent Element :" +
+				// log.debug("\nCurrent Element :" +
 				// l_crrntNode.getNodeName());
 
 				if (l_crrntNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -189,17 +191,17 @@ public class XmlParser {
 					Element Lcrnt_node_Element = (Element) l_crrntNode;
 
 					if (Lcrnt_node_Element != null) {
-						// System.out.println("Not null");
+						// log.debug("Not null");
 					}
 
-					// System.out.println("\nCurrent ENTITY_NODE :"
+					// log.debug("\nCurrent ENTITY_NODE :"
 					// +Lcrnt_node_Element+" :
 					// "+Lcrnt_node_Element.getElementsByTagName(Element_Name).item(0).getTextContent());
 					try {
 						int childlength = Lcrnt_node_Element.getElementsByTagName(Element_Name).getLength();
-						// System.out.println("childlength is :" + childlength);
+						// log.debug("childlength is :" + childlength);
 						l_renStr = Lcrnt_node_Element.getElementsByTagName(Element_Name).item(0).getTextContent();
-						System.out.println("Value in give tag [" + Element_Name + "] is [" + l_renStr + "]");
+						log.debug("Value in give tag [" + Element_Name + "] is [" + l_renStr + "]");
 					} catch (NullPointerException nullpo) {
 
 						return "";
@@ -233,14 +235,14 @@ public class XmlParser {
 		Document document = null;
 
 		if (xml_body.length() == 0 || xml_body.equals("")) {
-			System.out.println("XML should not be a null value");
+			log.debug("XML should not be a null value");
 			Response e_response = o_customexception.riseexception("Body should not be null", 400,
 					"Recevived body null");
 
 			throw new WebApplicationException(e_response);
 		}
 
-		// System.out.println("Inside Parser_xml["+xml_body+"]");
+		// log.debug("Inside Parser_xml["+xml_body+"]");
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
@@ -270,13 +272,13 @@ public class XmlParser {
 
 		// Here comes the root node
 		Element root = document.getDocumentElement();
-		// System.out.println(root.getNodeName());
-		// System.out.println("document"+document.getNodeValue());
-		// System.out.println("Root element :" +
+		// log.debug(root.getNodeName());
+		// log.debug("document"+document.getNodeValue());
+		// log.debug("Root element :" +
 		// document.getDocumentElement());
 		String name = root.getLocalName();
-		// System.out.println("Root Elemenmt Name is ["+name+"]");
-		System.out.println("Return root Elemrnt [" + name + "]");
+		// log.debug("Root Elemenmt Name is ["+name+"]");
+		log.debug("Return root Elemrnt [" + name + "]");
 
 		return name;
 
@@ -288,16 +290,16 @@ public class XmlParser {
 		try {
 			l_HashMap.clear();
 			if (xml_body.length() == 0 || xml_body.equals("")) {
-				System.out.println("XML should not be a null value");
+				log.debug("XML should not be a null value");
 
-				System.out.println("Returning Null");
-				System.out.println("l_HashMap is " + l_HashMap);
+				log.debug("Returning Null");
+				log.debug("l_HashMap is " + l_HashMap);
 				return l_HashMap;
 			}
 
 			// Empting the MAp
 
-			// System.out.println("Inside Parser_xml["+xml_body+"]");
+			// log.debug("Inside Parser_xml["+xml_body+"]");
 
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			factory.setNamespaceAware(true);
@@ -311,35 +313,35 @@ public class XmlParser {
 
 			// Here comes the root node
 			Element root = document.getDocumentElement();
-			// System.out.println(root.getNodeName());
-			// System.out.println("document"+document.getNodeValue());
-			// System.out.println("Root element :" +
+			// log.debug(root.getNodeName());
+			// log.debug("document"+document.getNodeValue());
+			// log.debug("Root element :" +
 			// document.getDocumentElement());
 			String name = root.getLocalName();
-			// System.out.println("Root Elemenmt Name is ["+name+"]");
-			System.out.println("Root Elemenmt Name is [" + name + "]");
+			// log.debug("Root Elemenmt Name is ["+name+"]");
+			log.debug("Root Elemenmt Name is [" + name + "]");
 
-			// System.out.println("1st child element :" +
+			// log.debug("1st child element :" +
 			// document.getChildNodes());
 			NodeList nodes = document.getElementsByTagName("*");
 
 			if (nodes.getLength() == 0) {
-				System.out.println("Nodes are enmpty" + nodes);
+				log.debug("Nodes are enmpty" + nodes);
 
 			}
 
 			else {
 
-				System.out.println("Received API Name is " + API_NAME);
+				log.debug("Received API Name is " + API_NAME);
 
 				for (int i = 0; i < nodes.getLength(); i++) {
 
 					Node l_crnt_node = nodes.item(i);
-					// System.out.println("\nCurrent Element :" +
+					// log.debug("\nCurrent Element :" +
 					// nodes.item(i).getNodeName());
 					if (l_crnt_node.getNodeType() == Node.ELEMENT_NODE) {
 						if (l_crnt_node.getLocalName().contains("BODY")) {
-							System.out.println("BODY found continued");
+							log.debug("BODY found continued");
 							continue;
 						}
 						if (!API_NAME.isEmpty()) {
@@ -347,19 +349,19 @@ public class XmlParser {
 
 							{
 
-								System.out.println("API NAME is [" + API_NAME + "] found");
+								log.debug("API NAME is [" + API_NAME + "] found");
 								continue;
 							}
 						}
 
 						// verify the tag has c
 						if (l_crnt_node.getChildNodes().getLength() > 1) {
-							System.out.println("Node  [" + l_crnt_node.getLocalName() + "] has child nodes ["
+							log.debug("Node  [" + l_crnt_node.getLocalName() + "] has child nodes ["
 									+ l_crnt_node.getChildNodes().getLength() + "] so continued");
 							continue;
 						}
 						// findind the values from map
-						System.out.println("Key:[" + l_crnt_node.getLocalName().trim() + "] Value ["
+						log.debug("Key:[" + l_crnt_node.getLocalName().trim() + "] Value ["
 								+ l_crnt_node.getTextContent().trim() + "]");
 						l_HashMap.put(l_crnt_node.getLocalName().trim(), l_crnt_node.getTextContent().trim());
 
@@ -368,7 +370,7 @@ public class XmlParser {
 			}
 
 		} catch (Exception e) {
-			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!Exception!!!!!!!!!!!!!!!!!!!!" + e);
+			log.debug("!!!!!!!!!!!!!!!!!!!!!!!Exception!!!!!!!!!!!!!!!!!!!!" + e);
 
 		}
 		return l_HashMap;
@@ -378,11 +380,11 @@ public class XmlParser {
 		Document document = null;
 
 		if (xml_body.length() == 0 || xml_body.equals("")) {
-			System.out.println("XML should not be a null value");
+			log.debug("XML should not be a null value");
 
 		}
 
-		// System.out.println("Inside Parser_xml["+xml_body+"]");
+		// log.debug("Inside Parser_xml["+xml_body+"]");
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = null;
@@ -406,21 +408,21 @@ public class XmlParser {
 
 		// Here comes the root node
 		Element root = document.getDocumentElement();
-		// System.out.println(root.getNodeName());
-		// System.out.println("document"+document.getNodeValue());
-		// System.out.println("Root element :" +
+		// log.debug(root.getNodeName());
+		// log.debug("document"+document.getNodeValue());
+		// log.debug("Root element :" +
 		// document.getDocumentElement());
 		String name = root.getLocalName();
-		// System.out.println("Root Elemenmt Name is ["+name+"]");
-		System.out.println("Root Elemenmt Name is from config [" + name + "]");
+		// log.debug("Root Elemenmt Name is ["+name+"]");
+		log.debug("Root Elemenmt Name is from config [" + name + "]");
 
-		// System.out.println("1st child element :" +
+		// log.debug("1st child element :" +
 		// document.getChildNodes());
 		NodeList nodes = document.getElementsByTagName("*");
 
 		if (nodes.getLength() == 0) {
 
-			System.out.println("Nodes are empty" + nodes);
+			log.debug("Nodes are empty" + nodes);
 		}
 
 		else {
@@ -428,21 +430,21 @@ public class XmlParser {
 			for (int i = 0; i < nodes.getLength(); i++) {
 
 				Node l_crnt_node = nodes.item(i);
-				System.out.println("\nCurrent Element :" + nodes.item(i).getNodeName());
+				log.debug("Current Element :" + nodes.item(i).getNodeName());
 				if (l_crnt_node.getNodeType() == Node.ELEMENT_NODE) {
 					if (l_crnt_node.getLocalName().contains("BODY")) {
-						System.out.println("BODY found continued");
+						log.debug("BODY found continued");
 						continue;
 					}
 					if (l_crnt_node.getLocalName().contains("HEADER")) {
-						System.out.println("HEADER found continued");
+						log.debug("HEADER found continued");
 						continue;
 					}
 
 					// verify the tag has c
 					if (l_crnt_node.getChildNodes().getLength() > 1) {
 						/*
-						 * System.out.println("Node  [" +
+						 * log.debug("Node  [" +
 						 * l_crnt_node.getLocalName() +
 						 * "] has child nodes [" +
 						 * l_crnt_node.getChildNodes().getLength() +
@@ -452,7 +454,7 @@ public class XmlParser {
 					}
 					// findind the values from map
 
-					System.out.println("Key:[" + l_crnt_node.getLocalName().trim() + "] Value ["
+					log.debug("Key:[" + l_crnt_node.getLocalName().trim() + "] Value ["
 							+ l_crnt_node.getTextContent().trim() + "]");
 
 				}
@@ -461,7 +463,7 @@ public class XmlParser {
 		}
 
 		/*} catch (Exception e) {
-			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!Exception!!!!!!!!!!!!!!!!!!!!");
+			log.debug("!!!!!!!!!!!!!!!!!!!!!!!Exception!!!!!!!!!!!!!!!!!!!!");
 			e.printStackTrace();
 			Response e_response = o_customexception.riseexception(e.getMessage(), 400, "Error while Processing XML");
 		

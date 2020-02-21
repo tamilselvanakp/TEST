@@ -2,8 +2,10 @@ package com.utility;
 
 import java.sql.Connection;
 
-public class SingletonStorage {
+import org.apache.log4j.Logger;
 
+public class SingletonStorage {
+	static Logger log = Logger.getLogger(SingletonStorage.class.getName());
 	Connection l_databaseConnection;
 	Connection l_imgdatabaseConnection;
 
@@ -31,14 +33,15 @@ public class SingletonStorage {
 
 	public static SingletonStorage getSingletonInstances() {
 		if (instance == null) {
-			System.out.println("Creating Obj for SingletonStorage class");
+			log.warn("***************************************************************************************");
+			log.debug("Creating Obj for SingletonStorage class");
 			synchronized (SingletonStorage.class) {
 				if (instance == null) {
 					instance = new SingletonStorage();
 				}
 			}
 		}
-		System.out.println("Returning Obj for Singleton class ");
+		log.debug("Returning Obj for Singleton class ");
 		return instance;
 	}
 

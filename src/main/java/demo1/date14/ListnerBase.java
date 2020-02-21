@@ -12,6 +12,8 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import org.apache.log4j.Logger;
+
 import com.utility.SingletonStorage;
 import com.utility.XmlParser;
 
@@ -19,6 +21,7 @@ import com.utility.XmlParser;
 public class ListnerBase implements ServletContextListener {
 	ServletContext ctx;
 	public Connection db_conn;
+	static Logger log = Logger.getLogger(ListnerBase.class.getName());
 	public Connection imgdb_conn;
 	SingletonStorage o_singleton = SingletonStorage.getSingletonInstances();
 
@@ -36,7 +39,7 @@ public class ListnerBase implements ServletContextListener {
 			l_buffreader.close();
 			ctx = event.getServletContext();
 
-			System.out.println(l_filebuff.trim());
+			log.debug(l_filebuff.trim());
 			XmlParser.configReader(l_filebuff);
 			ctx.setAttribute("StrconfigObj", l_filebuff);
 
@@ -49,10 +52,12 @@ public class ListnerBase implements ServletContextListener {
 		String uname = "IT_HLR";
 		String passwd = "lyca";
 		try {
-			System.out.println("HLR_DB_CON 0");
+			log.debug("HLR_DB_CON 0");
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			db_conn = DriverManager.getConnection(url, uname, passwd);
-			System.out.println("HLR_DB_CON establised");
+			log.debug("HLR_DB_CON establised");
+			log.info("HLR_DB_CON establised");
+
 			/*	// storing connection object as an attribute in ServletContext
 				ctx = event.getServletContext();
 				ctx.setAttribute("DB_conn", db_conn);
@@ -61,11 +66,12 @@ public class ListnerBase implements ServletContextListener {
 			// Storing Db conn as Singleton variable
 			o_singleton.setL_databaseConnection(db_conn);
 
-			System.out.println("Connection ob is [" + o_singleton.getL_databaseConnection() + "] has code :"
+			log.debug("Connection ob is [" + o_singleton.getL_databaseConnection() + "] has code :"
 					+ o_singleton.hashCode());
 		} catch (Exception e) {
 
-			e.printStackTrace();
+			log.error(e.getMessage());
+			;
 			return;
 		}
 
@@ -73,10 +79,10 @@ public class ListnerBase implements ServletContextListener {
 		String imguname = "IT_IMG";
 		String imgpasswd = "lyca";
 		try {
-			System.out.println("IT_IMG 0");
+			log.debug("IT_IMG 0");
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			imgdb_conn = DriverManager.getConnection(imgurl, imguname, imgpasswd);
-			System.out.println("IT_IMG establised");
+			log.debug("IT_IMG establised");
 			/*	// storing connection object as an attribute in ServletContext
 				ctx = event.getServletContext();
 				ctx.setAttribute("DB_conn", db_conn);
@@ -85,11 +91,13 @@ public class ListnerBase implements ServletContextListener {
 			// Storing Db conn as Singleton variable
 			o_singleton.setL_imgdatabaseConnection(imgdb_conn);
 
-			System.out.println("Connection ob is [" + o_singleton.getL_imgdatabaseConnection() + "] has code :"
+			log.debug("Connection ob is [" + o_singleton.getL_imgdatabaseConnection() + "] has code :"
 					+ o_singleton.hashCode());
+
 		} catch (Exception e) {
 
-			e.printStackTrace();
+			log.error(e.getMessage());
+			;
 			return;
 		}
 
@@ -102,18 +110,21 @@ public class ListnerBase implements ServletContextListener {
 			// Connection db_con = getDb_conn();
 
 			Connection db_con = o_singleton.getL_databaseConnection();
-			System.out.println("HLR_DB_CON closing [" + db_con + "] has code :" + o_singleton.hashCode());
+			log.debug("HLR_DB_CON closing [" + db_con + "] has code :" + o_singleton.hashCode());
 
 			db_con.close();
 			Connection imgdbcon = o_singleton.getL_imgdatabaseConnection();
-			System.out.println("HLR_DB_CON closing [" + imgdbcon + "] has code :" + o_singleton.hashCode());
+			log.debug("HLR_DB_CON closing [" + imgdbcon + "] has code :" + o_singleton.hashCode());
+
+			log.warn("***************************************************************************************");
 
 			db_con.close();
 			imgdbcon.close();
 
 		} catch (SQLException e) {
 
-			e.printStackTrace();
+			log.error(e.getMessage());
+			;
 			return;
 		}
 	}

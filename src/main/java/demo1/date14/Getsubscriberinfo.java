@@ -12,6 +12,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.log4j.Logger;
 import org.w3c.dom.NodeList;
 
 import com.exception.handler.CustomException;
@@ -21,7 +22,7 @@ import com.utility.XmlParser;
 
 @Path("Getsubscriberinfo")
 public class Getsubscriberinfo {
-
+	static Logger log = Logger.getLogger(Getsubscriberinfo.class.getName());
 	Getsubscriberinforepo l_Getsubscriberinforepo = new Getsubscriberinforepo();
 	XmlParser l_XmlParser = new XmlParser();
 	DirectResponse l_dir = new DirectResponse();
@@ -35,10 +36,10 @@ public class Getsubscriberinfo {
 	@Consumes(MediaType.APPLICATION_XML)
 	public Response Getsubscriberinfopost(String Received_Body) {
 
-		System.out.println("Received Body [" + Received_Body + "] and length" + Received_Body.length());
+		log.debug("Received Body [" + Received_Body + "] and length" + Received_Body.length());
 
 		String rootElement = XmlParser.getXmlrootElement(Received_Body);
-		System.out.println("Root element is :" + rootElement);
+		log.debug("Root element is :" + rootElement);
 		if (rootElement.equalsIgnoreCase("GET_SUBSCRIBER_INFO")
 				|| rootElement.equalsIgnoreCase("GET_SUBSCRIBER_INFO_REQUEST")) {
 			// Parsing the Xml into document
@@ -50,17 +51,17 @@ public class Getsubscriberinfo {
 			String L_msisdn = l_XmlParser.get_NodeList_to_elemet(l_nodelist, "MSISDN");
 			String l_iccid = l_XmlParser.get_NodeList_to_elemet(l_nodelist, "ICC_ID");
 
-			System.out.println("IMSI [" + l_imsi + "] length " + l_imsi.length() + " MSISDN length " + L_msisdn.length()
-					+ "[" + L_msisdn + "] ICC_ID [" + l_iccid + "] length " + l_iccid.length());
+			log.debug("IMSI [" + l_imsi + "] length " + l_imsi.length() + " MSISDN length " + L_msisdn.length() + "["
+					+ L_msisdn + "] ICC_ID [" + l_iccid + "] length " + l_iccid.length());
 			if (!l_imsi.isEmpty()) {
 				if (l_imsi.length() != 15) {
-					System.out.println("Imsi Length should be 15 digits");
+					log.debug("Imsi Length should be 15 digits");
 					Response e_response = o_customexception.riseexception("IMSI Length should be 15", 400,
 							"GET_LOCATION_INFO_REQUEST-->IMSI length is[" + l_imsi + "]");
 					throw new WebApplicationException(e_response);
 				}
 				if (!Utilities.isnumber(l_imsi)) {
-					System.out.println("Imsi should be number");
+					log.debug("Imsi should be number");
 					Response e_response = o_customexception.riseexception("Imsi should be number", 400,
 							"GET_LOCATION_INFO_REQUEST-->IMSI is[" + l_imsi + "]");
 					throw new WebApplicationException(e_response);
@@ -68,36 +69,36 @@ public class Getsubscriberinfo {
 			} else if (!L_msisdn.isEmpty()) {
 
 				if (!(L_msisdn.length() >= 10)) {
-					System.out.println("msisdn Length should grater then 10 digits");
+					log.debug("msisdn Length should grater then 10 digits");
 					Response e_response = o_customexception.riseexception("msisdn Length should grater then 10 digits",
 							400, "GET_LOCATION_INFO_REQUEST-->MSISDN length is[" + L_msisdn.length() + "]");
 					throw new WebApplicationException(e_response);
 				}
 				if (!Utilities.isnumber(L_msisdn)) {
-					System.out.println("Imsi should be number");
+					log.debug("Imsi should be number");
 					Response e_response = o_customexception.riseexception("msisdn should be number", 400,
 							"GET_LOCATION_INFO_REQUEST-->MSISDN is[" + L_msisdn + "]");
 					throw new WebApplicationException(e_response);
 				}
 			} else if (!l_iccid.isEmpty()) {
 				/*if (Utilities.isInRange(19, 20, l_iccid.length())) {
-					System.out.println("isInRange true");
+					log.debug("isInRange true");
 				} else {
-					System.out.println("isInRange False");
+					log.debug("isInRange False");
 				}*/
 
 				if (!Utilities.isInRange(19, 20, l_iccid
 						.length()))/*Utilities.isInRange will give true if the length is matched in limit so we need only false if ithe function ret  true then no issuse if it is rtn false then we neet to consider as true*/
 				{
 
-					System.out.println("iccid Length should be 19 or 20");
+					log.debug("iccid Length should be 19 or 20");
 					Response e_response = o_customexception.riseexception("iccid Length should be 19 or 20", 400,
 							"GET_LOCATION_INFO_REQUEST-->ICC_ID length is[" + l_iccid.length() + "]");
 					throw new WebApplicationException(e_response);
 				}
 
 			} else {
-				System.out.println("Either IMSI/MSISDN/ICCID should be Present");
+				log.debug("Either IMSI/MSISDN/ICCID should be Present");
 				Response e_response = o_customexception.riseexception("Either IMSI/MSISDN/ICCID should be Present", 400,
 						"GET_LOCATION_INFO_REQUEST-->Either IMSI/MSISDN/ICCID  is not present");
 				throw new WebApplicationException(e_response);
@@ -105,11 +106,11 @@ public class Getsubscriberinfo {
 
 			String l_type = l_XmlParser.get_NodeList_to_elemet(l_nodelist, "TYPE");
 			String l_reqdomine = l_XmlParser.get_NodeList_to_elemet(l_nodelist, "REQ_DOMAIN");
-			System.out.println("IMSI is [" + l_imsi + "] MSISDN [" + L_msisdn + "] ICC_ID [" + l_iccid + "] TYPE ["
-					+ l_type + "] REQ_DOMAIN [" + l_reqdomine + "]");
+			log.debug("IMSI is [" + l_imsi + "] MSISDN [" + L_msisdn + "] ICC_ID [" + l_iccid + "] TYPE [" + l_type
+					+ "] REQ_DOMAIN [" + l_reqdomine + "]");
 
 			if (l_doc != null) {
-				System.out.println("Getsubscriberinfo called");
+				log.debug("Getsubscriberinfo called");
 
 				return l_dir.getItem(Received_Body, context);
 			} else {
@@ -140,12 +141,12 @@ public class Getsubscriberinfo {
 		Response e_response = null;
 
 		String xml_ip = null;
-		System.out.println("GET Received IMSI [" + l_imsi + "]");
-		System.out.println("GET Received MSISDN [" + l_msisdn + "]");
-		System.out.println("GET Received ICCID [" + l_iccid + "]");
-		System.out.println("GET Received TYPE [" + l_type + "]");
-		System.out.println("GET Received DOMINE [" + l_reqdomine + "]");
-		/*System.out.println(((l_imsi != null || l_msisdn != null || l_iccid != null)
+		log.debug("GET Received IMSI [" + l_imsi + "]");
+		log.debug("GET Received MSISDN [" + l_msisdn + "]");
+		log.debug("GET Received ICCID [" + l_iccid + "]");
+		log.debug("GET Received TYPE [" + l_type + "]");
+		log.debug("GET Received DOMINE [" + l_reqdomine + "]");
+		/*log.debug(((l_imsi != null || l_msisdn != null || l_iccid != null)
 				&& (l_imsi != "" || l_msisdn != "" || l_iccid != "")));
 		if ((l_imsi != null || l_msisdn != null || l_iccid != null)
 				&& (l_imsi != "" || l_msisdn != "" || l_iccid != "")) {
