@@ -13,7 +13,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -24,6 +23,7 @@ import org.w3c.dom.NodeList;
 
 import com.dob.base.ImgDbQueryExecutor;
 import com.exception.handler.CustomException;
+import com.response.OverRideWpsResponse;
 import com.utility.HttpClient;
 import com.utility.ResponseSender;
 import com.utility.Secured;
@@ -33,6 +33,7 @@ import com.utility.Utilities;
 import com.utility.XmlParser;
 
 @Path("ImgAPIGateway")
+/*<OVERRIDE_WPS><TRANSCATION_ID>12@$65465</TRANSCATION_ID><IMSI>372290000000282</IMSI><OVERRIDE_WPS_FLAG>1</OVERRIDE_WPS_FLAG><REQUESTED_OVERRIDE_WPS>545645</REQUESTED_OVERRIDE_WPS><INITIATION_DATE>20200229</INITIATION_DATE></OVERRIDE_WPS>*/
 public class ImgAPIGateway {
 	static Logger log = Logger.getLogger(ImgAPIGateway.class.getName());
 	@Context
@@ -56,6 +57,7 @@ public class ImgAPIGateway {
 		log.debug("Received Body [" + Received_Body + "] and length" + Received_Body.length());
 		String rootElement = XmlParser.getXmlrootElement(Received_Body);
 		log.debug("Root element is :" + rootElement);
+		Utilities.addAPIinMDCtologger(rootElement);
 		if (rootElement.equalsIgnoreCase("OVERRIDE_WPS") || rootElement.equalsIgnoreCase("OVERRIDE_WPS_REQUEST")) {
 			org.w3c.dom.Document l_doc = l_XmlParser.Parser_xml(Received_Body);
 			// to split into node list
@@ -68,6 +70,8 @@ public class ImgAPIGateway {
 			String l_overrideflag = l_XmlParser.get_NodeList_to_elemet(l_nodelist, "OVERRIDE_WPS_FLAG");
 			String l_requestedWps = l_XmlParser.get_NodeList_to_elemet(l_nodelist, "REQUESTED_OVERRIDE_WPS");
 			String l_initiateDate = l_XmlParser.get_NodeList_to_elemet(l_nodelist, "INITIATION_DATE");
+			String l_txid = l_XmlParser.get_NodeList_to_elemet(l_nodelist, "TRANSCATION_ID");
+			Utilities.addTxIdinMDCtologger(l_txid);
 			String l_formater = String.format(
 					"Received IMSI:[%s]ICCID[%s] MSISDN[%s] OVERRIDE_WPS_FLAG[%s] REQUESTED_OVERRIDE_WPS[%s] INITIATION_DATE[%s]",
 					l_imsi, l_iccid, L_msisdn, l_overrideflag, l_requestedWps, l_initiateDate);
@@ -81,14 +85,21 @@ public class ImgAPIGateway {
 				log.debug("Date response is so:" + datelocal);
 				if (datelocal < 0) {
 					log.error("INITIATION_DATE should be grater then /equal to  current date");
-					return o_customexception.riseexceptionwithoutrootcause(
-							"INITIATION_DATE should be grater then /equal to  current date", 400);
+					/*return o_customexception.riseexceptionwithoutrootcause(
+							"INITIATION_DATE should be grater then /equal to  current date", 400);*/
+					OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid, 456, l_imsi,
+							"INITIATION_DATE should be grater then /equal to  current date");
+					return Response.status(400).entity(o_OverRideWpsResponse).build();
+
 				}
 			} catch (ParseException e1) {
 
 				e1.printStackTrace();
-				return o_customexception.riseexceptionwithoutrootcause("INITIATION_DATE should be in proper formate",
-						400);
+				/*	return o_customexception.riseexceptionwithoutrootcause("INITIATION_DATE should be in proper formate",
+							400);*/
+				OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid, 400, l_imsi,
+						"INITIATION_DATE should be in proper formate");
+				return Response.status(400).entity(o_OverRideWpsResponse).build();
 			}
 
 			if (!l_imsi.isEmpty() || !L_msisdn.isEmpty() || !l_iccid.isEmpty()) {
@@ -103,14 +114,22 @@ public class ImgAPIGateway {
 					if (db_Msisdn != null) {
 
 					} else {
-						return o_customexception.riseexceptionwithoutrootcause("MSISDN not Present in DataBase", 432);
-
+						// return
+						// o_customexception.riseexceptionwithoutrootcause("MSISDN
+						// not Present in DataBase", 432);
+						OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid, 459,
+								l_imsi, "MSISDN not Present in DataBase");
+						return Response.status(459).entity(o_OverRideWpsResponse).build();
 					}
 
 					// checking l_overrideflag is not empty in the request
 					if (l_overrideflag.isEmpty()) {
-						return o_customexception
-								.riseexceptionwithoutrootcause("OVERRIDE_WPS_FLAG should be either 0 or 1", 400);
+						/*return o_customexception
+								.riseexceptionwithoutrootcause("OVERRIDE_WPS_FLAG should be either 0 or 1", 400);*/
+
+						OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid, 459,
+								l_imsi, "OVERRIDE_WPS_FLAG should be either 0 or 1");
+						return Response.status(459).entity(o_OverRideWpsResponse).build();
 					}
 					// checking l_overrideflag is 0/1 in the request
 					if (Integer.parseInt(l_overrideflag.trim()) <= 1) {
@@ -130,12 +149,20 @@ public class ImgAPIGateway {
 										l_requestedWps);
 
 								log.debug("Roll back case sucess");
-								return o_ResponseSender.Sucessresponsebulder(db_Imsi, 0, "RollBack-Sucess");
+								// return
+								// o_ResponseSender.Sucessresponsebulder(db_Imsi,
+								// 0, "RollBack-Sucess");
+								OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Success", l_txid,
+										0, l_imsi, "");
+								return Response.status(200).entity(o_OverRideWpsResponse).build();
 
 							} else {
 								log.error("Subscriber not belongs to Override");
-								return o_customexception
-										.riseexceptionwithoutrootcause("Subscriber not belongs to Override", 432);
+								/*return o_customexception
+										.riseexceptionwithoutrootcause("Subscriber not belongs to Override", 432);*/
+								OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid,
+										432, l_imsi, "Subscriber not belongs to Override");
+								return Response.status(432).entity(o_OverRideWpsResponse).build();
 							}
 
 						} else {
@@ -144,7 +171,13 @@ public class ImgAPIGateway {
 							// Wps is number or not
 							if (!Utilities.isnumber(l_requestedWps.trim())) {
 								log.error("Wps should be a number");
-								return o_customexception.riseexceptionwithoutrootcause("Wps should be a number", 207);
+								// return
+								// o_customexception.riseexceptionwithoutrootcause("Wps
+								// should be a number", 207);
+
+								OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid,
+										431, l_imsi, "Wps should be a number");
+								return Response.status(431).entity(o_OverRideWpsResponse).build();
 							}
 
 							// if (Utilities.isInRange(0, 100,
@@ -157,8 +190,11 @@ public class ImgAPIGateway {
 								if (db_Wps.trim().equals(l_requestedWps.trim())) {
 									log.error("Subscriber Present with Same WPS DB-WPS[" + db_Wps.trim()
 											+ "] Requested [" + l_requestedWps.trim() + "]");
-									return o_customexception.riseexceptionwithoutrootcause(
-											"Subscriber Present with Same WPS DB-WPS", 206);
+									/*return o_customexception.riseexceptionwithoutrootcause(
+											"Subscriber Present with Same WPS DB-WPS", 206);*/
+									OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure",
+											l_txid, 206, l_imsi, "Subscriber Present with Same WPS DB-WPS");
+									return Response.status(206).entity(o_OverRideWpsResponse).build();
 
 								}
 							}
@@ -203,7 +239,12 @@ public class ImgAPIGateway {
 											l_requestedWps);
 									log.debug("Returining Sucess to client");
 
-									return o_ResponseSender.Sucessresponsebulder(db_Imsi, 0, "Sucess");
+									// return
+									// o_ResponseSender.Sucessresponsebulder(db_Imsi,
+									// 0, "Sucess");
+									OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Success",
+											l_txid, 0, l_imsi, "");
+									return Response.status(200).entity(o_OverRideWpsResponse).build();
 
 								} //
 
@@ -221,14 +262,26 @@ public class ImgAPIGateway {
 										resultMsg = "Failure record";
 									}
 									log.debug("resultMsg :" + resultMsg);
-									return o_ResponseSender.Sucessresponsebulder(db_Imsi, resultMsg, 600, "failure");
+									// return
+									// o_ResponseSender.Sucessresponsebulder(db_Imsi,
+									// resultMsg, 600, "failure");
+
+									OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure",
+											l_txid, 600, l_imsi, resultMsg);
+									return Response.status(600).entity(o_OverRideWpsResponse).build();
 								}
 
 							} catch (Exception e) {
 
 								e.printStackTrace();
 								log.error("Internal Server error");
-								return o_customexception.riseexceptionwithoutrootcause("Internal Server error", 500);
+								// return
+								// o_customexception.riseexceptionwithoutrootcause("Internal
+								// Server error", 500);
+
+								OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid,
+										500, l_imsi, "Internal Server error");
+								return Response.status(500).entity(o_OverRideWpsResponse).build();
 							}
 
 							/*	} else {
@@ -240,23 +293,35 @@ public class ImgAPIGateway {
 
 					} else {
 						log.error("OVERRIDE_WPS_FLAG should be either 0 or 1");
-						return o_customexception
-								.riseexceptionwithoutrootcause("OVERRIDE_WPS_FLAG should be either 0 or 1", 400);
+						/*return o_customexception
+								.riseexceptionwithoutrootcause("OVERRIDE_WPS_FLAG should be either 0 or 1", 400);*/
+						OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid, 448,
+								l_imsi, "OVERRIDE_WPS_FLAG should be either 0 or 1");
+						return Response.status(448).entity(o_OverRideWpsResponse).build();
 
 					}
 
 				} catch (SQLException e) {
 
 					e.printStackTrace();
-					return o_customexception.riseexceptionwithoutrootcause("Internal server error", 900);
+					// return
+					// o_customexception.riseexceptionwithoutrootcause("Internal
+					// server error", 900);
+					OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid, 500, l_imsi,
+							"Internal server error");
+					return Response.status(500).entity(o_OverRideWpsResponse).build();
 
 				}
 
 			} else {
 				log.error("Either IMSI/ICCID/MSISDN should be present");
-				Response l_resp = o_customexception
+				/*Response l_resp = o_customexception
 						.riseexceptionwithoutrootcause("Either IMSI/ICCID/MSISDN should be present", 400);
-				throw new WebApplicationException(l_resp);
+				throw new WebApplicationException(l_resp);*/
+
+				OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", l_txid, 400, l_imsi,
+						"Either IMSI/ICCID/MSISDN should be present");
+				return Response.status(400).entity(o_OverRideWpsResponse).build();
 
 			}
 
@@ -264,8 +329,12 @@ public class ImgAPIGateway {
 
 		{
 			log.debug("Not supported Request received");
-			Response l_resp = o_customexception.riseexceptionwithoutrootcause("Not supported Request", 400);
-			throw new WebApplicationException(l_resp);
+			/*Response l_resp = o_customexception.riseexceptionwithoutrootcause("Not supported Request", 400);
+			throw new WebApplicationException(l_resp);*/
+
+			OverRideWpsResponse o_OverRideWpsResponse = new OverRideWpsResponse("Failure", "", 400, "",
+					"Not supported Request");
+			return Response.status(400).entity(o_OverRideWpsResponse).build();
 		}
 
 	}

@@ -12,24 +12,23 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import org.apache.log4j.Logger;
+import org.glassfish.jersey.internal.guava.Multimap;
+import org.w3c.dom.Document;
 
-import com.utility.SingletonStorage;
 import com.utility.XmlParser;
 
 @WebListener
-public class ListnerBase implements ServletContextListener {
+public class ListnerBase extends Baseclass implements ServletContextListener {
 	ServletContext ctx;
 	public Connection db_conn;
-	static Logger log = Logger.getLogger(ListnerBase.class.getName());
+
 	public Connection imgdb_conn;
-	SingletonStorage o_singleton = SingletonStorage.getSingletonInstances();
 
 	public void contextInitialized(ServletContextEvent event) {
 
 		try {
 			File l_configFile = new File(
-					"D:\\LEARNING\\jar files\\pdf\\workspace\\date14\\Configuration\\ITconfig.xml");
+					"D:\\LEARNING\\jar files\\pdf\\workspace\\date15\\Configuration\\ITconfig.xml");
 			BufferedReader l_buffreader = new BufferedReader(new FileReader(l_configFile));
 			String st;
 			String l_filebuff = "";
@@ -40,8 +39,12 @@ public class ListnerBase implements ServletContextListener {
 			ctx = event.getServletContext();
 
 			log.debug(l_filebuff.trim());
-			XmlParser.configReader(l_filebuff);
-			ctx.setAttribute("StrconfigObj", l_filebuff);
+			Document l_configdoc = XmlParser.configReader(l_filebuff);
+			o_singleton.setConfigReaderDocument(l_configdoc);
+			Multimap<String, String> l_HashMap = XmlParser.getxmlToMultMap(l_filebuff, "");
+			log.debug("l_HashMap " + l_HashMap);
+
+			// ctx.setAttribute("StrconfigObj", l_filebuff);
 
 		} catch (Exception e1) {
 
@@ -124,7 +127,7 @@ public class ListnerBase implements ServletContextListener {
 		} catch (SQLException e) {
 
 			log.error(e.getMessage());
-			;
+
 			return;
 		}
 	}

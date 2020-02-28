@@ -1,6 +1,7 @@
 package com.utility;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -9,6 +10,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
@@ -472,4 +475,34 @@ public class XmlParser {
 		}*/
 		return document;
 	}
+
+	public static ArrayList<String> getdocValuebyXpath(Document xmlDocument, String xpathString)
+			throws XPathExpressionException {
+		ArrayList<String> l_list = new ArrayList<String>();
+		// XmlParser l_XmlParser = new XmlParser();
+		// org.w3c.dom.Document l_doc = l_XmlParser.Parser_xml(getsubres);
+		XPath l_xpath = XPathFactory.newInstance().newXPath();
+		XPathExpression expr = null;
+		if (xpathString.contains("text()")) {
+			// chercking it is contains text()
+			expr = l_xpath.compile(xpathString);
+		} else {
+			if (xpathString.endsWith("/")) {
+				// Ends with backslass or not
+				expr = l_xpath.compile(xpathString + "text()");
+			} else {
+				expr = l_xpath.compile(xpathString + "/text()");
+			}
+		}
+		Object result = expr.evaluate(xmlDocument, XPathConstants.NODESET);
+
+		NodeList nodes = (NodeList) result;
+
+		for (int i = 0; i < nodes.getLength(); i++) {
+			l_list.add(i, nodes.item(i).getNodeValue());
+			log.debug("Value_" + i + " :" + nodes.item(i).getNodeValue());
+		}
+		return l_list;
+	}
+
 }

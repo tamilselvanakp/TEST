@@ -1,11 +1,35 @@
 package com.utility;
 
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
 
 public class SingletonStorage {
 	static Logger log = Logger.getLogger(SingletonStorage.class.getName());
+
+	Map<String, Map<String, String>> l_blocklistMap = new HashMap<String, Map<String, String>>();
+
+	public Map<String, Map<String, String>> getL_blocklistMap() {
+		return l_blocklistMap;
+	}
+
+	public void setL_blocklistMap(Map<String, Map<String, String>> l_blocklistMap) {
+		this.l_blocklistMap = l_blocklistMap;
+	}
+
+	Document configReaderDocument;
+
+	public Document getConfigReaderDocument() {
+		return configReaderDocument;
+	}
+
+	public void setConfigReaderDocument(Document configReaderDocument) {
+		this.configReaderDocument = configReaderDocument;
+	}
+
 	Connection l_databaseConnection;
 	Connection l_imgdatabaseConnection;
 

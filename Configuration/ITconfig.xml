@@ -3,23 +3,56 @@
 
 
 <CONFIG>
-
-
-<GET_LOCATION_INFO>
-<ENTITY>TAMIL</ENTITY>
-<USER>192.168.151.134:ITG1008_00</USER>
-<CHANNEL>HLR</CHANNEL>
-
-
-</GET_LOCATION_INFO>
-
-
-
-
-
-<GET_LOCATION_DATA>
-<ENTITY>TAMIL1</ENTITY>
-<USER>192.168.151.134:ITG1008_00</USER>
-<CHANNEL>HLR1</CHANNEL>
-</GET_LOCATION_DATA>
+    <ENTITIES>
+        <ENTITY>
+            <NAME>TAMIL30</NAME>
+            <NETWORK>30</NETWORK>
+            <CLIENT_ID>1</CLIENT_ID>
+        </ENTITY>
+        <ENTITY>
+            <NAME>TAMIL60</NAME>
+            <NETWORK>60</NETWORK>
+              <CLIENT_ID>2</CLIENT_ID>
+        </ENTITY>
+        <ENTITY>
+            <NAME>DEB</NAME>
+            <NETWORK>1</NETWORK>
+              <CLIENT_ID>3</CLIENT_ID>
+        </ENTITY>
+        <ENTITY>
+            <NAME>TAMIL</NAME>
+            <NETWORK>60</NETWORK>
+              <CLIENT_ID>2</CLIENT_ID>
+        </ENTITY>
+        <ENTITY>
+            <NAME>97</NAME>
+            <NETWORK>97</NETWORK>
+              <CLIENT_ID>1</CLIENT_ID>
+        </ENTITY>
+        <ENTITY>
+            <NAME>FRANCE</NAME>
+            <NETWORK>73</NETWORK>
+              <CLIENT_ID>1</CLIENT_ID>
+        </ENTITY>
+        <ENTITY>
+            <NAME>TEST</NAME>
+            <NETWORK>99</NETWORK>
+              <CLIENT_ID>1</CLIENT_ID>
+        </ENTITY>
+    </ENTITIES>
+    
+    
+    <AUTHENICATION>
+    <FLAG>1</FLAG>
+    <TIMER>
+    <FLAG>1</FLAG>
+    <INTERVAL>120</INTERVAL>
+    </TIMER>
+    </AUTHENICATION>
+    
+    <IP_BLOCKLIST>
+    <FLAG>1</FLAG>
+    <DURATION_SEC>608</DURATION_SEC>
+    <NO_OF_ATTEMPTS>1</NO_OF_ATTEMPTS>
+    </IP_BLOCKLIST>
 </CONFIG>

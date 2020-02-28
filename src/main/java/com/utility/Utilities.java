@@ -5,14 +5,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class Utilities {
+	private static ReadWriteLock lock;
+	private static int requestCounter = 1;
 	static Logger log = Logger.getLogger(Utilities.class.getName());
 
 	public static boolean isnumber(String checkString) {
@@ -117,6 +121,23 @@ public class Utilities {
 		return l_currentDateTime;
 	}
 
+	public static String getCurrentDateTime(String formate) {
+		DateFormat dateFormat = new SimpleDateFormat(formate);
+		Date date = new Date();
+		String l_currentDateTime = dateFormat.format(date);
+		log.debug(l_currentDateTime);
+		return l_currentDateTime;
+	}
+
+	public static java.sql.Date getCurrentSqlDateTime() {
+
+		Date date = new Date();
+
+		java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+		log.debug("Returning Sql date :" + sqlDate);
+		return sqlDate;
+	}
+
 	public static void jsonParserNoReturn(String str) {
 		// json node to json obj to traverse each element
 		JsonElement rootNode = JsonParser.parseString(str);
@@ -196,5 +217,21 @@ public class Utilities {
 				"Comapring date Received Date1 [" + received_Date1 + "] with Received Date2 [" + received_Date2 + "]");
 
 		return received_Date1.compareTo(received_Date2);
+	}
+
+	public synchronized static void addAPIinMDCtologger(String Element) {
+		Formatter l_formater = new Formatter();
+		l_formater.format("%010d", requestCounter);
+		MDC.put("API", Element + ":" + l_formater);
+		requestCounter++;
+		l_formater.close();
+	}
+
+	public synchronized static void addTxIdinMDCtologger(String TxId) {
+		Formatter l_formater = new Formatter();
+
+		MDC.put("Tx-Id", TxId);
+
+		l_formater.close();
 	}
 }

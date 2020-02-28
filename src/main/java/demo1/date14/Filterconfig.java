@@ -9,6 +9,7 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.MDC;
 
 @Provider
 public class Filterconfig implements ContainerRequestFilter, ContainerResponseFilter {
@@ -44,9 +45,12 @@ public class Filterconfig implements ContainerRequestFilter, ContainerResponseFi
 			e.printStackTrace();
 		}
 	}*/
+	final String DEFAULT_CLIENT_ID = "0";
+	String strClientid = null;
 
 	@Override
 	public void filter(ContainerRequestContext reqContext) throws IOException {
+
 		log.debug("-- req info --");
 		log.debug("Req Context [" + reqContext + "]");
 		log.debug("getHeaders [" + reqContext.getHeaders() + "]");
@@ -64,6 +68,8 @@ public class Filterconfig implements ContainerRequestFilter, ContainerResponseFi
 		log.debug("BODY [" + resContext.getEntity() + "]");
 		log.debug("Response code [" + resContext.getStatus() + "]");
 		log.debug("Response date [" + resContext.getDate() + "]");
+
+		MDC.remove("API");
 
 	}
 

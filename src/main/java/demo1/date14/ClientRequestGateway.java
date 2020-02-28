@@ -38,6 +38,7 @@ public class ClientRequestGateway {
 	@Produces({ "application/xml" })
 	@Consumes(MediaType.APPLICATION_XML)
 	public Response TCPPostRequestGateway(String xmlIP) {
+
 		log.debug("ClientRequestGateway Received Request [" + xmlIP + "]");
 		/*log.debug("XmlIP.equals(null) , XmlIP.isEmpty() " + (XmlIP.equals(null)) + (XmlIP.isEmpty())
 				+ "  -----[" + ((XmlIP.equals(null)) && (XmlIP.isEmpty())));*/
@@ -45,6 +46,8 @@ public class ClientRequestGateway {
 			Multimap<String, String> l_HashMap = XmlParser.getxmlToMultMap(xmlIP, "");
 			Document l_doc = l_XmlParser.Parser_xml(xmlIP);
 			Element l_rootelement = l_doc.getDocumentElement();
+			// adding Api in Logger
+			Utilities.addAPIinMDCtologger(l_rootelement.getLocalName());
 			if (l_rootelement.getLocalName().equalsIgnoreCase("ADD_PRODUCT_REQUEST")
 					|| l_rootelement.getLocalName().equalsIgnoreCase("ADD_PRODUCT")) {
 				log.debug("Request is ADD Product");

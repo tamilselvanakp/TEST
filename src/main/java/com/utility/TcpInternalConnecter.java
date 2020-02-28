@@ -1,5 +1,8 @@
 package com.utility;
 
+import java.util.Formatter;
+import java.util.List;
+
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -12,7 +15,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class TcpInternalConnecter {
+import demo1.date14.Baseclass;
+
+public class TcpInternalConnecter extends Baseclass {
 
 	public static void jsonParserNoReturn(String str) {
 		// json node to json obj to traverse each element
@@ -168,13 +173,16 @@ public class TcpInternalConnecter {
 		// SslConfigurator sslConfig =
 		// SslConfigurator.newInstance().keyStoreFile("D:\\Software\\testkey.pem");
 
-		String getsubres = "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><ns0:updateSubscriberDetailsResponseV3 xmlns:ns0=\"http://T-Mobile/Wholesale/xml\"><ns0:headerResponse><ns0:senderID>XX</ns0:senderID><ns0:tranDateTime>2018-01-04T23:25:22.692-08:00</ns0:tranDateTime></ns0:headerResponse><ns0:body><ns0:response><ns0:partnerTransactionID>4d6a62cf-cc37-4017-93b3-1b4235de7977</ns0:partnerTransactionID><ns0:updateSubscriberDetails><ns0:status>SUCCESS</ns0:status><ns0:partnerID>XX</ns0:partnerID><ns0:action>UpdateWPS</ns0:action><ns0:MSISDN>7075340903</ns0:MSISDN><ns0:ICCID>8901260710040290066</ns0:ICCID><ns0:result><ns0:result>100</ns0:result><ns0:status>SUCCESS</ns0:status></ns0:result></ns0:updateSubscriberDetails></ns0:response><ns0:responseCount>1</ns0:responseCount></ns0:body></ns0:updateSubscriberDetailsResponseV3></SOAP-ENV:Body></SOAP-ENV:Envelope>";
+		// String getsubres = "<SOAP-ENV:Envelope
+		// xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><ns0:updateSubscriberDetailsResponseV3
+		// xmlns:ns0=\"http://T-Mobile/Wholesale/xml\"><ns0:headerResponse><ns0:senderID>XX</ns0:senderID><ns0:tranDateTime>2018-01-04T23:25:22.692-08:00</ns0:tranDateTime></ns0:headerResponse><ns0:body><ns0:response><ns0:partnerTransactionID>4d6a62cf-cc37-4017-93b3-1b4235de7977</ns0:partnerTransactionID><ns0:updateSubscriberDetails><ns0:status>SUCCESS</ns0:status><ns0:partnerID>XX</ns0:partnerID><ns0:action>UpdateWPS</ns0:action><ns0:MSISDN>7075340903</ns0:MSISDN><ns0:ICCID>8901260710040290066</ns0:ICCID><ns0:result><ns0:result>100</ns0:result><ns0:status>SUCCESS</ns0:status></ns0:result></ns0:updateSubscriberDetails></ns0:response><ns0:responseCount>1</ns0:responseCount></ns0:body></ns0:updateSubscriberDetailsResponseV3></SOAP-ENV:Body></SOAP-ENV:Envelope>";
 
 		// String getsubres = "<SOAP-ENV:Envelope
 		// xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\"><SOAP-ENV:Body><ns0:updateSubscriberDetailsResponseV3
 		// xmlns:ns0=\"http://T-Mobile/Wholesale/xml\"><ns0:headerResponse><ns0:senderID>XX</ns0:senderID><ns0:tranDateTime>2018-01-04T23:25:22.692-08:00</ns0:tranDateTime></ns0:headerResponse><ns0:body><ns0:response><ns0:partnerTransactionID>4d6a62cf-cc37-4017-93b3-1b4235de7977</ns0:partnerTransactionID><ns0:updateSubscriberDetails><ns0:status>SUCCESS</ns0:status><ns0:partnerID>XX</ns0:partnerID><ns0:action>UpdateWPS</ns0:action><ns0:MSISDN>7075340903</ns0:MSISDN><ns0:ICCID>8901260710040290066</ns0:ICCID><ns0:result><ns0:result>100</ns0:result><ns0:status>SUCCESS</ns0:status></ns0:result></ns0:updateSubscriberDetails></ns0:response><ns0:responseCount>1</ns0:responseCount></ns0:body></ns0:updateSubscriberDetailsResponseV3></SOAP-ENV:Body></SOAP-ENV:Envelope>";
 		// String getsubres =
 		// "<RESPONSE><HEADER><TRANSACTION_ID><CHILD_TRANSACTION_ID>qws</CHILD_TRANSACTION_ID><CHILD_TRANSACTION_ID>123456</CHILD_TRANSACTION_ID></TRANSACTION_ID><REQUEST_TYPE>GET_SUBSCRIBER_INFO</REQUEST_TYPE><ERROR_CODE>255</ERROR_CODE><ERROR_DESC>Success</ERROR_DESC><CHILD><INNERCHILE>testing</INNERCHILE></CHILD></HEADER><TEST><REQUEST_TYPE>GET_SUBSCRIBER_DATA</REQUEST_TYPE><TRANSACTION_ID>123</TRANSACTION_ID><NW_ID>60</NW_ID><ACC_ID>1811724</ACC_ID><IMSI_TYPE>P</IMSI_TYPE><SEC_IMSIS><IMSI_01><IMSI>187412645030121</IMSI><FAD></FAD><BURNT_TYPE>1</BURNT_TYPE></IMSI_01></SEC_IMSIS></TEST></RESPONSE>";
+		String getsubres = "<CONFIG><ENTITIES><ENTITY><NAME>TAMIL</NAME><NETWORK>30</NETWORK></ENTITY><ENTITY><NAME>TAMIL1</NAME><NETWORK>60</NETWORK></ENTITY></ENTITIES></CONFIG>";
 		// String getsubres = "<a:RESPONSE xmnls:a=\"www.tamil.com\"
 		// ><a:HEADER><a:TRANSACTION_ID><a:CHILD_TRANSACTION_ID>qws</a:CHILD_TRANSACTION_ID><a:CHILD_TRANSACTION_ID>123456</a:CHILD_TRANSACTION_ID></a:TRANSACTION_ID><a:REQUEST_TYPE>GET_SUBSCRIBER_INFO</a:REQUEST_TYPE><a:ERROR_CODE>255</a:ERROR_CODE><a:ERROR_DESC>Success</a:ERROR_DESC><CHILD><INNERCHILE>testing</INNERCHILE></CHILD></a:HEADER><TEST
 		// xmlns=\"http://www.w3.org/TR/html4/\"><REQUEST_TYPE>GET_SUBSCRIBER_DATA</REQUEST_TYPE><TRANSACTION_ID>123</TRANSACTION_ID><NW_ID>60</NW_ID><ACC_ID>1811724</ACC_ID><IMSI_TYPE>P</IMSI_TYPE><SEC_IMSIS><IMSI_01><IMSI>187412645030121</IMSI><FAD></FAD><BURNT_TYPE>1</BURNT_TYPE></IMSI_01></SEC_IMSIS></TEST></a:RESPONSE>";
@@ -235,8 +243,9 @@ public class TcpInternalConnecter {
 			System.out.println("sub doesnt have local imsi");
 		}*/
 		XPath l_xpath = XPathFactory.newInstance().newXPath();
-
-		XPathExpression expr = l_xpath.compile("//updateSubscriberDetail/status/text()");
+		String AAA = "//ENTITY/NAME//";
+		System.out.println(AAA.endsWith("/"));
+		XPathExpression expr = l_xpath.compile("//ENTITY/NAME/text()");
 		Object result = expr.evaluate(l_doc, XPathConstants.NODESET);
 
 		NodeList nodes = (NodeList) result;
@@ -245,6 +254,18 @@ public class TcpInternalConnecter {
 		for (int i = 0; i < nodes.getLength(); i++) {
 			System.out.println("Val " + nodes.item(i).getNodeValue());
 		}
+
+		List<String> ll = XmlParser.getdocValuebyXpath(l_doc, "//ENTITY/NAME/text()");
+		for (String aa : ll) {
+			System.out.println(aa);
+		}
+
+		String Prefix = "TEST:";
+		Formatter l_formater = new Formatter();
+		l_formater = l_formater.format("%09d", 1);
+		System.out.println(l_formater);
+		int aaa = Integer.parseInt(l_formater.toString());
+		System.out.println(aaa);
 
 	}
 
