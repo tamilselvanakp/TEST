@@ -1,5 +1,6 @@
 package demo1.date14;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -13,10 +14,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.dob.base.GetauthTokenDob;
 import com.response.GenerateAuthTokenResponse;
@@ -56,15 +60,33 @@ public class GenerateAuthtoken extends Baseclass {
 		int l_networkFromConfig = 0;
 		log.info("GenerateauthToken called [" + Thread.currentThread().getName() + "]");
 		log.info("Received Body [" + Received_Body + "] and length" + Received_Body.length());
-		String rootElement = XmlParser.getXmlrootElement(Received_Body);
+		String rootElement = null;
+		try {
+			rootElement = XmlParser.getXmlrootElement(Received_Body);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		log.debug("Root element in :" + rootElement);
 		if (rootElement.equalsIgnoreCase("GENERATE_AUTH_TOKEN")
 				|| rootElement.equalsIgnoreCase("GENERATE_AUTH_TOKEN_REQUEST")) {
 			Utilities.addAPIinMDCtologger(rootElement);
-			org.w3c.dom.Document l_doc = l_XmlParser.Parser_xml(Received_Body);
+			org.w3c.dom.Document l_doc;
+			NodeList l_nodelist;
+			try {
+				l_doc = l_XmlParser.Parser_xml(Received_Body);
+				l_nodelist = l_XmlParser.get_Doc_to_NodeList(l_doc, "*");
+			} catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e1) {
+				log.error("Exception" + e1.getMessage());
+				e1.printStackTrace();
+				GenerateAuthTokenResponse o_respObj = new GenerateAuthTokenResponse("", 500, "Failure",
+						"Internal server error", "");
+				return Response.status(400).entity(o_respObj).build();
+
+			}
 			// to split into node list
-			NodeList l_nodelist = l_XmlParser.get_Doc_to_NodeList(l_doc, "*");
+
 			// Getting the particular Element in the Node list
 			String l_user = l_XmlParser.get_NodeList_to_elemet(l_nodelist, "USER_NAME");
 

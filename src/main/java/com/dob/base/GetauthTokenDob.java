@@ -112,6 +112,7 @@ public class GetauthTokenDob extends Baseclass {
 		l_map.put("network_name", l_clable.getString(18));
 		l_map.put("error_code", Integer.toString(output));
 		l_map.put("error_msg", l_clable.getString(25));
+		l_clable.close();
 		return l_map;
 
 	}
@@ -139,6 +140,7 @@ public class GetauthTokenDob extends Baseclass {
 		l_map.put("network_id", Integer.toString(network_id));
 		l_map.put("error_code", Integer.toString(errcode));
 		l_map.put("error_msg", error_msg);
+		l_clable.close();
 		return l_map;
 
 	}
@@ -226,6 +228,7 @@ public class GetauthTokenDob extends Baseclass {
 					+ "] [ " + Client_id + "]");
 			oprst = stmt.executeUpdate();
 			System.out.println("No of Rows Inserted :" + oprst);
+			PRPstmt.close();
 		}
 
 		if (oprst > 0) {

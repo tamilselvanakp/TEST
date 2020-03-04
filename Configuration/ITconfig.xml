@@ -3,6 +3,12 @@
 
 
 <CONFIG>
+
+<API>
+<GET_LOCATION_INFO>
+<ENTITY>TAMIL</ENTITY>
+</GET_LOCATION_INFO>
+</API>
     <ENTITIES>
         <ENTITY>
             <NAME>TAMIL30</NAME>
@@ -17,7 +23,7 @@
         <ENTITY>
             <NAME>DEB</NAME>
             <NETWORK>1</NETWORK>
-              <CLIENT_ID>3</CLIENT_ID>
+              <CLIENT_ID>13</CLIENT_ID>
         </ENTITY>
         <ENTITY>
             <NAME>TAMIL</NAME>
@@ -52,7 +58,7 @@
     
     <IP_BLOCKLIST>
     <FLAG>1</FLAG>
-    <DURATION_SEC>608</DURATION_SEC>
-    <NO_OF_ATTEMPTS>1</NO_OF_ATTEMPTS>
+    <DURATION_SEC>120</DURATION_SEC>
+    <NO_OF_ATTEMPTS>2</NO_OF_ATTEMPTS>
     </IP_BLOCKLIST>
 </CONFIG>

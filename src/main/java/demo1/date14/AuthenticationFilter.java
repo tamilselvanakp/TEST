@@ -1,7 +1,11 @@
 package demo1.date14;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -97,7 +101,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 			int l_ipBlockListConfigCount) {
 		log.error("Remote Ip " + request.getRemoteAddr());
 		String remote_Ip = request.getRemoteAddr();
-		SimpleDateFormat l_dateFormat = new SimpleDateFormat("dow mon dd hh:mm:ss zzz yyyy");
+		SimpleDateFormat l_dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Map<String, Map<String, String>> l_blocklistMap = o_singleton.getL_blocklistMap();
 		// Map<String, Map<String, String>> l_blocklistMap = new HashMap<String,
 		// Map<String, String>>();
@@ -108,7 +112,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 					log.debug("Contains Ip in Map");
 
 					Map<String, String> innerMap = l_blocklistMap.get(remote_Ip);
-					log.debug(innerMap);
+					log.debug("Inner MAP :" + innerMap);
 					int m_count = Integer.parseInt(innerMap.get("Count"));
 					String m_firstdate = innerMap.get("firstdate");
 					String m_finaldate = innerMap.get("finaldate");
@@ -117,22 +121,38 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 					Date d_finaldate = l_dateFormat.parse(m_finaldate);
 
 					log.debug("Map d_firstdate[" + d_firstdate + "] d_finaldate [" + d_finaldate + "]");
-					long diffInmiliSec = Math.abs(d_finaldate.getTime() - d_firstdate.getTime());
+
+					String l_currentTime = Utilities.getCurrentDateTime("yyyy-MM-dd HH:mm:ss");
+					Date d_currentTime = l_dateFormat.parse(l_currentTime);
+					// long diffInmiliSec = Math.abs(d_finaldate.getTime() -
+					// d_currentTime.getTime());
+
+					long diffInmiliSec = Math.subtractExact(d_finaldate.getTime(), d_currentTime.getTime());
+					log.debug("diffInmiliSec in mili sec [" + diffInmiliSec + "]");
 
 					long diffinsec = TimeUnit.SECONDS.convert(diffInmiliSec, TimeUnit.MILLISECONDS);
-					if (l_ipconfigBlockListDuration > diffinsec) {
+					log.debug("Diff time in seconds [" + diffinsec + "] l_ipconfigBlockListDuration ["
+							+ l_ipconfigBlockListDuration + "]");
 
-						log.debug("diffinsec " + diffinsec + "is not  grater then configured Time "
-								+ l_ipconfigBlockListDuration);
+					if (!(diffinsec < 0)) {
 
+						log.debug("diffinsec " + diffinsec + "is not less then 0 so in check count");
+						log.debug("Inner map" + innerMap);
 						if (m_count > l_ipBlockListConfigCount) {
 							log.error(" m_count is " + m_count + " greater then l_ipBlockListConfigCount "
 									+ l_ipBlockListConfigCount);
+							m_count = m_count + 1;
+							innerMap.put("Count", Integer.toString(m_count));
+							log.debug("Inner map" + innerMap);
+
+							l_blocklistMap.put(remote_Ip, innerMap);
+							log.debug("Outer map" + l_blocklistMap);
+							o_singleton.setL_blocklistMap(l_blocklistMap);
 
 							return false;
 						} else {
 							log.debug("Count not expired so....adding count");
-							m_count += m_count;
+							m_count = m_count + 1;
 							innerMap.put("Count", Integer.toString(m_count));
 							log.debug("Inner map" + innerMap);
 
@@ -143,11 +163,36 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 						}
 
 					} else {
-						log.debug("diffinsec " + diffinsec + "is  grater then configured Time "
-								+ l_ipconfigBlockListDuration);
+						log.debug("diffinsec is less then 0");
+
+						FileWriter fw = null;
+						BufferedWriter bw = null;
+						try {
+							fw = new FileWriter("D:\\JMETER_REPORT\\Blocklist_IP_List.txt", true);
+							bw = new BufferedWriter(fw);
+							PrintWriter olt = new PrintWriter(bw);
+
+							olt.write("Current date=" + Utilities.getCurrentDateTime() + ": [" + remote_Ip + ":"
+									+ l_blocklistMap.get(remote_Ip) + "]");
+
+							olt.write(System.lineSeparator());
+
+							log.debug("adding in to Blocklist_IP_List.txt ");
+							olt.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+							log.error("Exception while writing" + e);
+						} finally {
+							try {
+								bw.close();
+								fw.close();
+							} catch (Exception e) {
+								log.error("Error while closing");
+							}
+						}
 
 						innerMap.put("Count", Integer.toString(1));
-						String currentdate = Utilities.getCurrentDateTime("dow mon dd hh:mm:ss zzz yyyy");
+						String currentdate = Utilities.getCurrentDateTime("yyyy-MM-dd HH:mm:ss");
 						innerMap.put("firstdate", currentdate);
 						Date d_currentdate = l_dateFormat.parse(currentdate);
 
@@ -156,7 +201,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 						l_cal.add(Calendar.SECOND, l_ipconfigBlockListDuration);
 
 						Date d_Finaldate = l_cal.getTime();
-						String l_finaldate = d_Finaldate.toString();
+						String l_finaldate = l_dateFormat.format(d_Finaldate);
 						log.info("Count [" + 1 + "] firstdate[" + currentdate + "] l_finaldate[" + l_finaldate + "] ");
 						innerMap.put("finaldate", l_finaldate);
 						l_blocklistMap.put(remote_Ip, innerMap);
@@ -166,51 +211,44 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 					}
 
 				} else {
-					log.info("Add to new entry to Map");
-					Map<String, String> innerMap = new HashMap<>();
-					innerMap.put("Count", Integer.toString(1));
-					String currentdate = Utilities.getCurrentDateTime("dow mon dd hh:mm:ss zzz yyyy");
-					innerMap.put("firstdate", currentdate);
-					Date d_currentdate = l_dateFormat.parse(currentdate);
-
-					Calendar l_cal = Calendar.getInstance();
-					l_cal.setTime(d_currentdate);
-					l_cal.add(Calendar.SECOND, l_ipconfigBlockListDuration);
-
-					Date d_Finaldate = l_cal.getTime();
-					String l_finaldate = d_Finaldate.toString();
-					log.info("Count [" + 1 + "] firstdate[" + currentdate + "] l_finaldate[" + l_finaldate + "] ");
-					innerMap.put("finaldate", l_finaldate);
-					l_blocklistMap.put(remote_Ip, innerMap);
-					o_singleton.setL_blocklistMap(l_blocklistMap);
-					return true;
+					return AuthenticationFilter.adnewEntryTomap(l_dateFormat, l_ipconfigBlockListDuration,
+							l_blocklistMap, remote_Ip, o_singleton);
 				}
 
 			} else {
-				log.info("Add to new entry to Map");
-				Map<String, String> innerMap = new HashMap<>();
-				innerMap.put("Count", Integer.toString(1));
-				String currentdate = Utilities.getCurrentDateTime("dow mon dd hh:mm:ss zzz yyyy");
-				innerMap.put("firstdate", currentdate);
-				Date d_currentdate = l_dateFormat.parse(currentdate);
-
-				Calendar l_cal = Calendar.getInstance();
-				l_cal.setTime(d_currentdate);
-				l_cal.add(Calendar.SECOND, l_ipconfigBlockListDuration);
-
-				Date d_Finaldate = l_cal.getTime();
-				String l_finaldate = d_Finaldate.toString();
-				log.info("Count [" + 1 + "] firstdate[" + currentdate + "] l_finaldate[" + l_finaldate + "] ");
-				innerMap.put("finaldate", l_finaldate);
-				l_blocklistMap.put(remote_Ip, innerMap);
-				o_singleton.setL_blocklistMap(l_blocklistMap);
-				return true;
+				return AuthenticationFilter.adnewEntryTomap(l_dateFormat, l_ipconfigBlockListDuration, l_blocklistMap,
+						remote_Ip, o_singleton);
 			}
 		} catch (Exception e) {
 			log.error("Exception while Processing so return true [" + e.getMessage() + "]");
 			e.printStackTrace();
 			return true;
 		}
+
+	}
+
+	public static boolean adnewEntryTomap(SimpleDateFormat l_dateFormat, int l_ipconfigBlockListDuration,
+			Map<String, Map<String, String>> l_blocklistMap, String remote_Ip, SingletonStorage o_singleton)
+			throws ParseException {
+		log.info("Add to new entry to Map");
+		Map<String, String> innerMap = new HashMap<>();
+		innerMap.put("Count", Integer.toString(1));
+		String currentdate = Utilities.getCurrentDateTime("yyyy-MM-dd HH:mm:ss");
+		innerMap.put("firstdate", currentdate);
+
+		Date d_currentdate = l_dateFormat.parse(currentdate);
+
+		Calendar l_cal = Calendar.getInstance();
+		l_cal.setTime(d_currentdate);
+		l_cal.add(Calendar.SECOND, l_ipconfigBlockListDuration);
+
+		Date d_Finaldate = l_cal.getTime();
+		String l_finaldate = l_dateFormat.format(d_Finaldate);
+		log.info("Count [" + 1 + "] firstdate[" + currentdate + "] l_finaldate[" + l_finaldate + "] ");
+		innerMap.put("finaldate", l_finaldate);
+		l_blocklistMap.put(remote_Ip, innerMap);
+		o_singleton.setL_blocklistMap(l_blocklistMap);
+		return true;
 
 	}
 
@@ -225,7 +263,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 		try {
 			arrayAuthenicationConfigFlag = XmlParser.getdocValuebyXpath(l_docc, "//AUTHENICATION/FLAG/text()");
 		} catch (XPathExpressionException e1) {
-			InternalServererror(requestContext, ipBlockListDuration, ipBlockListCount, l_ipBlockListFlag);
+			abortWith(requestContext, 500, "Internal Server error", ipBlockListDuration, ipBlockListCount,
+					l_ipBlockListFlag);
 			e1.printStackTrace();
 
 		}
@@ -258,6 +297,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 			}
 			try {
+
 				l_autherizationWindowInterval = Integer.parseInt(
 						(XmlParser.getdocValuebyXpath(l_docc, "//AUTHENICATION/TIMER/INTERVAL/text()")).get(0));
 			} catch (Exception e) {
@@ -273,7 +313,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 				l_authorizationHeader = requestContext.getHeaderString("X-API-TOKEN").trim();
 
 			} catch (Exception e) {
-				TokenNotPresent(requestContext, l_authorizationHeader, ipBlockListDuration, ipBlockListCount,
+				abortWith(requestContext, 401, "Unauthorized", ipBlockListDuration, ipBlockListCount,
 						l_ipBlockListFlag);
 			}
 			log.debug("l_authorizationHeader[" + l_authorizationHeader + "]");
@@ -304,10 +344,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 								log.info("Authenication Timer Enabled so Checking Last Updated Time");
 								String l_lastgeneratedTime = l_map.get("Date");
 								log.debug("l_lastgeneratedTime [" + l_lastgeneratedTime + "]");
-								String l_currentDatestr = Utilities.getCurrentDateTime("yyyy-dd-mm HH:mm:SS");
+								String l_currentDatestr = Utilities.getCurrentDateTime("yyyy-MM-dd HH:mm:ss");
 								log.debug("l_currentDate [" + l_currentDatestr + "]");
 
-								SimpleDateFormat l_dobfor = new SimpleDateFormat("yyyy-dd-mm HH:mm:SS");
+								SimpleDateFormat l_dobfor = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 								/*
 								*/
 								Date currentdate = l_dobfor.parse(l_currentDatestr);
@@ -315,15 +355,27 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 								log.debug(" in date lastgeneratedTime [" + tkenGeneratedate + "] currentDate ["
 										+ currentdate + "]");
-								long diffInmiliSec = Math.abs(tkenGeneratedate.getTime() - currentdate.getTime());
+								// long diffInmiliSec =
+								// Math.abs(tkenGeneratedate.getTime()
+								// -currentdate.getTime());
+
+								long diffInmiliSec = Math.subtractExact(currentdate.getTime(),
+										tkenGeneratedate.getTime());
+
+								/*if (diffInmiliSec < 0) {
+									log.info("Token Expired.... diffInmiliSec [" + diffInmiliSec + "]");
+									abortWith(requestContext, 401, "Taken Expired", ipBlockListDuration,
+											ipBlockListCount, l_ipBlockListFlag);
+									return;
+								}*/
 								log.info(" diffInmiliSec " + diffInmiliSec);
 								long diff = TimeUnit.MINUTES.convert(diffInmiliSec, TimeUnit.MILLISECONDS);
 								log.info(" diff " + diff);
 								log.debug("l_autherizationWindowInterval" + l_autherizationWindowInterval);
 								if (diff > l_autherizationWindowInterval) {
 									log.info("Token Expired....");
-									TokenExpired(requestContext, ipBlockListDuration, ipBlockListCount,
-											l_ipBlockListFlag);
+									abortWith(requestContext, 401, "Token Expired", ipBlockListDuration,
+											ipBlockListCount, l_ipBlockListFlag);
 									return;
 								} else {
 									log.info("Token Window not expired....");
@@ -334,20 +386,23 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 							log.info("Authenciation Sucess");
 						} else {
 							log.error("Authenciation Failed");
-							invalidToken(requestContext, ipBlockListDuration, ipBlockListCount, l_ipBlockListFlag);
+							abortWith(requestContext, 401, "Unauthorized", ipBlockListDuration, ipBlockListCount,
+									l_ipBlockListFlag);
+							return;
 						}
 
 					} catch (Exception e) {
 						e.printStackTrace();
 						log.error("Invalid Formate of client Id   " + e.getMessage());
-						invalidClientId(requestContext, ipBlockListDuration, ipBlockListCount, l_ipBlockListFlag);
-
+						abortWith(requestContext, 400, "Invalid Formate of client Id", ipBlockListDuration,
+								ipBlockListCount, l_ipBlockListFlag);
+						return;
 					}
 
 				}
 			} else {
 				log.debug("Received invalidTokenFormate");
-				invalidTokenFormate(requestContext, l_authorizationHeader, ipBlockListDuration, ipBlockListCount,
+				abortWith(requestContext, 403, "invalidTokenFormate", ipBlockListDuration, ipBlockListCount,
 						l_ipBlockListFlag);
 				return;
 			}
@@ -366,92 +421,130 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 	}
 
-	public void invalidTokenFormate(ContainerRequestContext requestContext, String l_authorizationHeader,
-			int ipBlockListDuration, int ipBlockListCount, int l_ipBlockListFlag) {
-		ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(401, "Invalid Auth token",
-				"Auth token is [" + l_authorizationHeader + "] invalid formate so rejected", Uri);
-		requestContext.abortWith(Response.status(Status.UNAUTHORIZED)
-				.header("X-API-TOKEN", AUTHENTICATION_SCHEME + l_authorizationHeader).entity(o_ErrorMsgClass).build());
-		if (l_ipBlockListFlag == 1) {
-			Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
-			if (flag == false) {
-				bloclisted(requestContext);
-			}
-		}
-	}
-
 	public boolean isvalidauthToken(String authToken) {
 		GetauthTokenDob o_dod = new GetauthTokenDob();
 		return o_dod.validateauthtoken(authToken);
 
 	}
-
+	/*
+	 * 
+	 * 	public void invalidTokenFormate(ContainerRequestContext requestContext, String l_authorizationHeader,
+			int ipBlockListDuration, int ipBlockListCount, int l_ipBlockListFlag) {
+	
+		if (l_ipBlockListFlag == 1) {
+			Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
+			if (flag == false) {
+				log.debug("bloclisted called");
+				bloclisted(requestContext);
+				return;
+			}
+		}
+		ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(401, "Invalid Auth token",
+				"Auth token is [" + l_authorizationHeader + "] invalid formate so rejected", Uri);
+		requestContext.abortWith(Response.status(Status.UNAUTHORIZED)
+				.header("X-API-TOKEN", AUTHENTICATION_SCHEME + l_authorizationHeader).entity(o_ErrorMsgClass).build());
+	}
+	
+	
 	public void TokenNotPresent(ContainerRequestContext requestContext, String l_authorizationHeader,
 			int ipBlockListDuration, int ipBlockListCount, int l_ipBlockListFlag) {
+	
+		if (l_ipBlockListFlag == 1) {
+			Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
+			if (flag == false) {
+				log.debug("bloclisted called");
+				bloclisted(requestContext);
+				return;
+			}
+		}
 		ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(401, "Token Not present in xml Header",
 				"Auth token is [" + l_authorizationHeader + "] invalid formate so rejected", Uri);
 		requestContext.abortWith(Response.status(Status.UNAUTHORIZED)
 				.header("X-API-TOKEN", AUTHENTICATION_SCHEME + l_authorizationHeader).entity(o_ErrorMsgClass).build());
-
-		if (l_ipBlockListFlag == 1) {
-			Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
-			if (flag == false) {
-				bloclisted(requestContext);
+	}
+	
+		public void invalidClientId(ContainerRequestContext requestContext, int ipBlockListDuration, int ipBlockListCount,
+				int l_ipBlockListFlag) {
+	
+			if (l_ipBlockListFlag == 1) {
+				Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
+				if (flag == false) {
+					log.debug("bloclisted called");
+					bloclisted(requestContext);
+					return;
+				}
+			}
+			ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(401, "Invalid Client Id", Uri);
+			requestContext.abortWith(Response.status(Status.UNAUTHORIZED).entity(o_ErrorMsgClass).build());
+		}
+	
+		public void invalidToken(ContainerRequestContext requestContext, int ipBlockListDuration, int ipBlockListCount,
+				int l_ipBlockListFlag) {
+	
+			if (l_ipBlockListFlag == 1) {
+				Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
+				if (flag == false) {
+					log.debug("bloclisted called");
+					bloclisted(requestContext);
+					return;
+				}
+				ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(401, "invalidToken", Uri);
+				requestContext.abortWith(Response.status(Status.UNAUTHORIZED).entity(o_ErrorMsgClass).build());
 			}
 		}
-	}
-
-	public void invalidClientId(ContainerRequestContext requestContext, int ipBlockListDuration, int ipBlockListCount,
-			int l_ipBlockListFlag) {
-		ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(401, "Invalid Client Id", Uri);
-		requestContext.abortWith(Response.status(Status.UNAUTHORIZED).entity(o_ErrorMsgClass).build());
-		if (l_ipBlockListFlag == 1) {
-			Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
-			if (flag == false) {
-				bloclisted(requestContext);
+	
+		public void InternalServererror(ContainerRequestContext requestContext, int ipBlockListDuration,
+				int ipBlockListCount, int l_ipBlockListFlag) {
+	
+			if (l_ipBlockListFlag == 1) {
+	
+				Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
+				if (flag == false) {
+					log.debug("bloclisted called");
+					bloclisted(requestContext);
+					return;
+				}
 			}
+			ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(500, "Internal Server error", Uri);
+			requestContext.abortWith(Response.status(Status.INTERNAL_SERVER_ERROR).entity(o_ErrorMsgClass).build());
 		}
-	}
-
-	public void invalidToken(ContainerRequestContext requestContext, int ipBlockListDuration, int ipBlockListCount,
-			int l_ipBlockListFlag) {
-		ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(401, "invalidToken", Uri);
-		requestContext.abortWith(Response.status(Status.UNAUTHORIZED).entity(o_ErrorMsgClass).build());
-		if (l_ipBlockListFlag == 1) {
-			Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
-			if (flag == false) {
-				bloclisted(requestContext);
+	
+		public void TokenExpired(ContainerRequestContext requestContext, int ipBlockListDuration, int ipBlockListCount,
+				int l_ipBlockListFlag) {
+	
+			if (l_ipBlockListFlag == 1) {
+				Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
+				if (flag == false) {
+					log.debug("bloclisted called");
+					bloclisted(requestContext);
+				}
 			}
-		}
-	}
-
-	public void InternalServererror(ContainerRequestContext requestContext, int ipBlockListDuration,
-			int ipBlockListCount, int l_ipBlockListFlag) {
-		ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(500, "Internal Server error", Uri);
-		requestContext.abortWith(Response.status(Status.INTERNAL_SERVER_ERROR).entity(o_ErrorMsgClass).build());
-		if (l_ipBlockListFlag == 1) {
-			Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
-			if (flag == false) {
-				bloclisted(requestContext);
-			}
-		}
-	}
-
-	public void TokenExpired(ContainerRequestContext requestContext, int ipBlockListDuration, int ipBlockListCount,
-			int l_ipBlockListFlag) {
-		ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(403, "Token Expired", Uri);
-		requestContext.abortWith(Response.status(Status.FORBIDDEN).entity(o_ErrorMsgClass).build());
-		if (l_ipBlockListFlag == 1) {
-			Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
-			if (flag == false) {
-				bloclisted(requestContext);
-			}
-		}
-	}
+			ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(403, "Token Expired", Uri);
+			requestContext.abortWith(Response.status(Status.FORBIDDEN).entity(o_ErrorMsgClass).build());
+		}*/
 
 	public void bloclisted(ContainerRequestContext requestContext) {
 		ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(489, "Block Listed", Uri);
 		requestContext.abortWith(Response.status(Status.FORBIDDEN).entity(o_ErrorMsgClass).build());
+
+	}
+
+	public void abortWith(ContainerRequestContext requestContext, int code, String Message, int ipBlockListDuration,
+			int ipBlockListCount, int l_ipBlockListFlag) {
+
+		if (l_ipBlockListFlag == 1) {
+
+			Boolean flag = validateBlockListProcess(l_HttpServletRequest, ipBlockListDuration, ipBlockListCount);
+			if (flag == false) {
+				log.debug("bloclisted called");
+				bloclisted(requestContext);
+				return;
+			}
+		}
+		log.error("Sending response With Code: " + code + " and ReaSon: " + Message);
+		ErrorMsgClass o_ErrorMsgClass = new ErrorMsgClass(code, Message, Uri);
+		requestContext.abortWith(Response.status(code).entity(o_ErrorMsgClass).build());
+		return;
 
 	}
 

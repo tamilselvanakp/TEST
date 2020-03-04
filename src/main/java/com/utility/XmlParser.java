@@ -1,10 +1,9 @@
 package com.utility;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,6 +21,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.exception.handler.CustomException;
 
@@ -29,42 +29,47 @@ public class XmlParser {
 	static Logger log = Logger.getLogger(XmlParser.class.getName());
 	static CustomException o_customexception = new CustomException();
 
-	public Document Parser_xml(String xml_body) {
+	public Document Parser_xml(String xml_body) throws ParserConfigurationException, SAXException, IOException {
 		Document document = null;
 
 		if (xml_body.length() == 0 || xml_body.equals("")) {
 			log.debug("XML should not be a null value");
-			Response e_response = o_customexception.riseexception("Body should not be null", 400,
-					"Recevived body null");
+			return null;
 
-			throw new WebApplicationException(e_response);
 		}
-
+		xml_body = xml_body.trim();
 		// log.debug("Inside Parser_xml["+xml_body+"]");
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		log.debug("DocumentBuilderFactory ");
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder;
-		try {
-			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e1) {
-			Response e_response = o_customexception.riseexception(e1.getMessage(), 500, "Error while processing");
-			e1.printStackTrace();
-			throw new WebApplicationException(e_response);
-
-		}
+		/*try {*/
+		builder = factory.newDocumentBuilder();
+		/*}catch(
+		
+		ParserConfigurationException e1)
+		{
+				Response e_response = o_customexception.riseexception(e1.getMessage(), 500, "Error while processing");
+				e1.printStackTrace();
+				throw new WebApplicationException(e_response);
+		
+			}*/
 
 		// Build Document
-		try {
+		/*try {*/
 
-			document = builder.parse(new InputSource(new StringReader(xml_body)));
-		} catch (Exception e) {
+		document = builder.parse(new InputSource(new StringReader(xml_body)));
+		/*}catch(
+		
+		Exception e)
+		{
 			Response e_response = o_customexception.riseexception(e.getLocalizedMessage(), 400,
 					"Recevived body should be a valid XML");
 			e.printStackTrace();
 			throw new WebApplicationException(e_response);
-
-		}
+		
+		}*/
 		// Normalize the XML Structure; It's just too important !!
 		document.getDocumentElement().normalize();
 
@@ -218,58 +223,59 @@ public class XmlParser {
 		return l_renStr;
 	}
 
-	public NodeList get_Doc_to_NodeList(Document l_document, String expression) {
+	public NodeList get_Doc_to_NodeList(Document l_document, String expression) throws XPathExpressionException {
 		NodeList f_nodeList = null;
-		try {
-			XPath xPath = XPathFactory.newInstance().newXPath();
+		/*try {*/
+		XPath xPath = XPathFactory.newInstance().newXPath();
 
-			// = "/CONFIG";
-			Object objnodeList = xPath.compile(expression).evaluate(l_document, XPathConstants.NODESET);
-			f_nodeList = (NodeList) objnodeList;
-		} catch (Exception e) {
+		// = "/CONFIG";
+		Object objnodeList = xPath.compile(expression).evaluate(l_document, XPathConstants.NODESET);
+		f_nodeList = (NodeList) objnodeList;
+		/*} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 		return f_nodeList;
 
 	}
 
-	public static String getXmlrootElement(String xml_body) {
+	public static String getXmlrootElement(String xml_body)
+			throws ParserConfigurationException, SAXException, IOException {
 
 		Document document = null;
 
-		if (xml_body.length() == 0 || xml_body.equals("")) {
+		/*if (xml_body.length() == 0 || xml_body.equals("")) {
 			log.debug("XML should not be a null value");
 			Response e_response = o_customexception.riseexception("Body should not be null", 400,
 					"Recevived body null");
-
+		
 			throw new WebApplicationException(e_response);
-		}
+		}*/
 
 		// log.debug("Inside Parser_xml["+xml_body+"]");
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder;
-		try {
-			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e1) {
+		/*try {*/
+		builder = factory.newDocumentBuilder();
+		/*} catch (ParserConfigurationException e1) {
 			Response e_response = o_customexception.riseexception(e1.getMessage(), 500, "Error while processing");
 			e1.printStackTrace();
 			throw new WebApplicationException(e_response);
-
-		}
+		
+		}*/
 
 		// Build Document
-		try {
+		/*try {*/
 
-			document = builder.parse(new InputSource(new StringReader(xml_body)));
-		} catch (Exception e) {
-			Response e_response = o_customexception.riseexception(e.getLocalizedMessage(), 400,
-					"Recevived body should be a valid XML");
-			e.printStackTrace();
-			throw new WebApplicationException(e_response);
-
-		}
+		document = builder.parse(new InputSource(new StringReader(xml_body)));
+		/*} catch (Exception e) {
+		Response e_response = o_customexception.riseexception(e.getLocalizedMessage(), 400,
+				"Recevived body should be a valid XML");
+		e.printStackTrace();
+		throw new WebApplicationException(e_response);
+		
+		}*/
 		// Normalize the XML Structure; It's just too important !!
 		document.getDocumentElement().normalize();
 
@@ -289,97 +295,101 @@ public class XmlParser {
 
 	static Multimap<String, String> l_HashMap = HashMultimap.create();
 
-	public static Multimap<String, String> getxmlToMultMap(String xml_body, String API_NAME) {
-		try {
-			l_HashMap.clear();
-			if (xml_body.length() == 0 || xml_body.equals("")) {
-				log.debug("XML should not be a null value");
+	public static Multimap<String, String> getxmlToMultMap(String xml_body, String API_NAME)
+			throws SAXException, IOException, ParserConfigurationException {
+		/*	try {*/
+		l_HashMap.clear();
+		if (xml_body.length() == 0 || xml_body.equals("")) {
+			log.debug("XML should not be a null value");
 
-				log.debug("Returning Null");
-				log.debug("l_HashMap is " + l_HashMap);
-				return l_HashMap;
-			}
+			log.debug("Returning Null");
+			log.debug("l_HashMap is " + l_HashMap);
+			return l_HashMap;
+		}
 
-			// Empting the MAp
+		// Empting the MAp
 
-			// log.debug("Inside Parser_xml["+xml_body+"]");
+		// log.debug("Inside Parser_xml["+xml_body+"]");
 
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			factory.setNamespaceAware(true);
-			DocumentBuilder builder = factory.newDocumentBuilder();
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
+		DocumentBuilder builder = factory.newDocumentBuilder();
 
-			// Build Document
-			Document document = builder.parse(new InputSource(new StringReader(xml_body)));
+		// Build Document
+		Document document = builder.parse(new InputSource(new StringReader(xml_body)));
 
-			// Normalize the XML Structure; It's just too important !!
-			document.getDocumentElement().normalize();
+		// Normalize the XML Structure; It's just too important !!
+		document.getDocumentElement().normalize();
 
-			// Here comes the root node
-			Element root = document.getDocumentElement();
-			// log.debug(root.getNodeName());
-			// log.debug("document"+document.getNodeValue());
-			// log.debug("Root element :" +
-			// document.getDocumentElement());
-			String name = root.getLocalName();
-			// log.debug("Root Elemenmt Name is ["+name+"]");
-			log.debug("Root Elemenmt Name is [" + name + "]");
+		// Here comes the root node
+		Element root = document.getDocumentElement();
+		// log.debug(root.getNodeName());
+		// log.debug("document"+document.getNodeValue());
+		// log.debug("Root element :" +
+		// document.getDocumentElement());
+		String name = root.getLocalName();
+		// log.debug("Root Elemenmt Name is ["+name+"]");
+		log.debug("Root Elemenmt Name is [" + name + "]");
 
-			// log.debug("1st child element :" +
-			// document.getChildNodes());
-			NodeList nodes = document.getElementsByTagName("*");
+		// log.debug("1st child element :" +
+		// document.getChildNodes());
+		NodeList nodes = document.getElementsByTagName("*");
 
-			if (nodes.getLength() == 0) {
-				log.debug("Nodes are enmpty" + nodes);
-
-			}
-
-			else {
-
-				log.debug("Received API Name is " + API_NAME);
-
-				for (int i = 0; i < nodes.getLength(); i++) {
-
-					Node l_crnt_node = nodes.item(i);
-					// log.debug("\nCurrent Element :" +
-					// nodes.item(i).getNodeName());
-					if (l_crnt_node.getNodeType() == Node.ELEMENT_NODE) {
-						if (l_crnt_node.getLocalName().contains("BODY")) {
-							log.debug("BODY found continued");
-							continue;
-						}
-						if (!API_NAME.isEmpty()) {
-							if (l_crnt_node.getLocalName().contains(API_NAME))
-
-							{
-
-								log.debug("API NAME is [" + API_NAME + "] found");
-								continue;
-							}
-						}
-
-						// verify the tag has c
-						if (l_crnt_node.getChildNodes().getLength() > 1) {
-							log.debug("Node  [" + l_crnt_node.getLocalName() + "] has child nodes ["
-									+ l_crnt_node.getChildNodes().getLength() + "] so continued");
-							continue;
-						}
-						// findind the values from map
-						log.debug("Key:[" + l_crnt_node.getLocalName().trim() + "] Value ["
-								+ l_crnt_node.getTextContent().trim() + "]");
-						l_HashMap.put(l_crnt_node.getLocalName().trim(), l_crnt_node.getTextContent().trim());
-
-					}
-				}
-			}
-
-		} catch (Exception e) {
-			log.debug("!!!!!!!!!!!!!!!!!!!!!!!Exception!!!!!!!!!!!!!!!!!!!!" + e);
+		if (nodes.getLength() == 0) {
+			log.debug("Nodes are enmpty" + nodes);
 
 		}
-		return l_HashMap;
+
+		else {
+
+			log.debug("Received API Name is " + API_NAME);
+
+			for (int i = 0; i < nodes.getLength(); i++) {
+
+				Node l_crnt_node = nodes.item(i);
+				// log.debug("\nCurrent Element :" +
+				// nodes.item(i).getNodeName());
+				if (l_crnt_node.getNodeType() == Node.ELEMENT_NODE) {
+					if (l_crnt_node.getLocalName().contains("BODY")) {
+						log.debug("BODY found continued");
+						continue;
+					}
+					if (!API_NAME.isEmpty()) {
+						if (l_crnt_node.getLocalName().contains(API_NAME))
+
+						{
+
+							log.debug("API NAME is [" + API_NAME + "] found");
+							continue;
+						}
+					}
+
+					// verify the tag has c
+					if (l_crnt_node.getChildNodes().getLength() > 1) {
+						log.debug("Node  [" + l_crnt_node.getLocalName() + "] has child nodes ["
+								+ l_crnt_node.getChildNodes().getLength() + "] so continued");
+						continue;
+					}
+					// findind the values from map
+					log.debug("Key:[" + l_crnt_node.getLocalName().trim() + "] Value ["
+							+ l_crnt_node.getTextContent().trim() + "]");
+					l_HashMap.put(l_crnt_node.getLocalName().trim(), l_crnt_node.getTextContent().trim());
+
+				}
+			}
+		}
+
+		/*}catch(
+		
+		Exception e)
+		{
+			log.debug("!!!!!!!!!!!!!!!!!!!!!!!Exception!!!!!!!!!!!!!!!!!!!!" + e);
+		
+		}*/return l_HashMap;
 	}
 
-	public static Document configReader(String xml_body) {
+	public static Document configReader(String xml_body)
+			throws ParserConfigurationException, SAXException, IOException {
 		Document document = null;
 
 		if (xml_body.length() == 0 || xml_body.equals("")) {
@@ -391,21 +401,24 @@ public class XmlParser {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setNamespaceAware(true);
 		DocumentBuilder builder = null;
-		try {
-			builder = factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e1) {
+		/*	try {*/
+		builder = factory.newDocumentBuilder();
+		/*} catch (ParserConfigurationException e1) {
 			e1.printStackTrace();
-		}
+		}*/
 
 		// Build Document
-		try {
+		/*try {*/
 
-			document = builder.parse(new InputSource(new StringReader(xml_body)));
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-		}
+		document = builder.parse(new InputSource(new StringReader(xml_body)));
+		/*	}catch(
+		
+			Exception e)
+			{
+		
+				e.printStackTrace();
+		
+			}*/
 		// Normalize the XML Structure; It's just too important !!
 		document.getDocumentElement().normalize();
 

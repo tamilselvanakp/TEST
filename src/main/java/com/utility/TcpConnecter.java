@@ -34,9 +34,7 @@ public class TcpConnecter {
 			throws NumberFormatException, SocketTimeoutException, IOException, Exception {
 		if (Channel_name.equalsIgnoreCase("HLR")) {
 
-			UtilsVariable o_UtilsVariable = new UtilsVariable();
-
-			log.debug("!!!!!!!!!!!-----current data-----!!!!!!" + o_UtilsVariable.getL_date());
+			log.debug("Inside sendTcpClientRequest");
 			return makeTCPconnection(TcpIP.trim(), TcpPort, xml_ip, isReqcontainRegrequest);
 
 		} else {
@@ -173,7 +171,6 @@ public class TcpConnecter {
 						log.debug("DATA IS READ FROM CHANNELS SUCCESFULY,Actual response is : [" + p_Response.trim()
 								+ "]");
 
-						Client.close();
 					}
 				}
 
@@ -185,6 +182,14 @@ public class TcpConnecter {
 				log.debug("connection not established");
 			}
 
+		}
+		try {
+
+		}
+
+		finally {
+			log.debug("Closed connection");
+			Client.close();
 		}
 		return p_Response;
 	}
