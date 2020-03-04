@@ -8,32 +8,37 @@ import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import com.utility.Utilities;
+
 public class ImgDbQueryExecutor {
+	static Logger log = Logger.getLogger(Utilities.class.getName());
 
 	public static Map<String, String> querySubscriberdetailsInDb(Connection l_conn, String l_imsi, String l_msisdn,
 			String l_iccid) throws SQLException {
 		Map<String, String> l_map = new LinkedHashMap<>();
 		String l_queryvar = "";
 		if (!l_imsi.isEmpty()) {
-			System.out.println("IMSI is not empty");
+			log.debug("IMSI is not empty");
 			l_queryvar = "IMSI = " + "'" + l_imsi + "'";
 
 		} else if (!l_iccid.isEmpty()) {
-			System.out.println("l_iccid is not empty");
+			log.debug("l_iccid is not empty");
 			l_queryvar = "ICC_ID = " + "'" + l_iccid + "'";
 
 		} else if (!l_msisdn.isEmpty()) {
-			System.out.println("l_msisdn is not empty");
+			log.debug("l_msisdn is not empty");
 			l_queryvar = "MSISDN = " + "'" + l_msisdn + "'";
 		} else {
-			System.out.println("Pass Atleast one element");
+			log.debug("Pass Atleast one element");
 			return null;
 		}
 
 		String queryStr = "SELECT IMSI,ICC_ID,THIRD_PARTY_IMSI,THIRD_PARTY_ICC_ID,NETWORK_ID,STATUS,MSISDN,MSISDN_UPDATED_DATE,LIFE_CYCLE_STATE,ZIP_CODE,CURRENT_PACKAGE,PORTIN_REQUEST_ID,FORMAT_TYPE,WPS,OVERRIDE_WPS_FLAG,OVERRIDE_WPS from IMG_SUBS_ACCOUNT where "
 				+ l_queryvar;
 
-		System.out.println("Query Str :" + queryStr);
+		log.debug("Query Str :" + queryStr);
 		Statement l_Statement = l_conn.createStatement();
 		ResultSet l_restltst = l_Statement.executeQuery(queryStr);
 
@@ -43,12 +48,12 @@ public class ImgDbQueryExecutor {
 				String key = l_metadata.getColumnName(i);
 				String value = l_restltst.getString(key);
 				l_map.put(key, value);
-				System.out.print("Query Op is : ");
-				System.out.print(key + " [" + value + "]\t");
+
+				log.debug(key + " [" + value + "]");
 			}
 
 		}
-		System.out.println();
+		log.debug("\n");
 		return l_map;
 
 	}
@@ -72,12 +77,12 @@ public class ImgDbQueryExecutor {
 			queryForUpdate = "update IMG_SUBS_ACCOUNT set WPS_OVERRIDDEN_DATE =SYSDATE, OVERRIDE_WPS = " + null
 					+ " ,OVERRIDE_WPS_FLAG = '" + l_OverRideWPSFlag + "'  where imsi = '" + l_imsi + "'";
 		}
-		System.out.println(queryForUpdate);
+		log.debug(queryForUpdate);
 		Statement l_statmt = l_conn.createStatement();
 
 		int oprst = l_statmt.executeUpdate(queryForUpdate);
 
-		System.out.println("No of rows affected [" + oprst + "]");
+		log.debug("No of rows affected [" + oprst + "]");
 
 	}
 

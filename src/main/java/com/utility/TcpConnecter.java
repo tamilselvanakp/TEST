@@ -10,9 +10,12 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Formatter;
 
+import org.apache.log4j.Logger;
+
 import com.exception.handler.CustomException;
 
 public class TcpConnecter {
+	static Logger log = Logger.getLogger(TcpConnecter.class.getName());
 	static Socket Client = null;
 	static SocketAddress sockaddr = null;
 	static boolean IsSocketCreated = false;
@@ -31,13 +34,11 @@ public class TcpConnecter {
 			throws NumberFormatException, SocketTimeoutException, IOException, Exception {
 		if (Channel_name.equalsIgnoreCase("HLR")) {
 
-			UtilsVariable o_UtilsVariable = new UtilsVariable();
-
-			System.out.println("!!!!!!!!!!!-----current data-----!!!!!!" + o_UtilsVariable.getL_date());
+			log.debug("Inside sendTcpClientRequest");
 			return makeTCPconnection(TcpIP.trim(), TcpPort, xml_ip, isReqcontainRegrequest);
 
 		} else {
-			System.out.println("Channel name should be HLR");
+			log.debug("Channel name should be HLR");
 			return "";
 
 		}
@@ -52,7 +53,7 @@ public class TcpConnecter {
 		Client = new Socket();
 
 		sockaddr = new InetSocketAddress(TcpIP.trim(), TcpPort);
-		System.out.println("connecting to ..." + sockaddr.toString());
+		log.debug("connecting to ..." + sockaddr.toString());
 		if (regReqFlag == true) {
 
 			noOfReq = 2;
@@ -64,11 +65,11 @@ public class TcpConnecter {
 		Client.connect(sockaddr, 1000);
 		if (Client.isConnected()) {
 			IsSocketCreated = true;
-			System.out.println("connection established");
+			log.debug("connection established");
 
 			/*}
 			} catch (Exception e) {
-			System.out.println("Exception while creating socket,Reason is:" + e.getMessage());
+			log.debug("Exception while creating socket,Reason is:" + e.getMessage());
 			
 			}*/
 
@@ -81,8 +82,8 @@ public class TcpConnecter {
 						reqLength = regRequestStr.length();
 						Formatter lenString = Utilities.getRequestLenthin9digit(reqLength);
 						regRequestStr = lenString + regRequestStr;
-						System.out.println("Request to:" + regRequestStr);
-						System.out.println("Sending Req Len :" + regRequestStr.getBytes().length);
+						log.debug("Request to:" + regRequestStr);
+						log.debug("Sending Req Len :" + regRequestStr.getBytes().length);
 						outToServer.write(regRequestStr.getBytes());
 						outToServer.flush();
 						Client.setSoTimeout(10000);
@@ -90,7 +91,7 @@ public class TcpConnecter {
 						in = Client.getInputStream();
 						reader = new InputStreamReader(in);
 
-						// System.out.println("bef while" +
+						// log.debug("bef while" +
 						// Client.getReceiveBufferSize());
 						char[] cbuf1 = new char[Client.getReceiveBufferSize() + 1];
 						reader.read(cbuf1, 0, 9);
@@ -101,13 +102,13 @@ public class TcpConnecter {
 						}
 						int intResLength = Integer.parseInt(resLength.trim());
 
-						System.out.println("resLength [" + intResLength + "]");
+						log.debug("resLength [" + intResLength + "]");
 
 						char[] cbuf2 = new char[Client.getReceiveBufferSize() + 1];
 						reader.read(cbuf2, 0, intResLength);
 						/*int i = -1;
 						 * while ((i = in.read()) > -1) {
-							System.out.println(i);
+							log.debug(i);
 							p_Response += (char) i;
 						
 						}*/
@@ -117,22 +118,22 @@ public class TcpConnecter {
 
 						}
 
-						System.out.println("DATA IS READ FROM CHANNELS SUCCESFULY,Actual response is : ["
-								+ p_Response.trim() + "]");
+						log.debug("DATA IS READ FROM CHANNELS SUCCESFULY,Actual response is : [" + p_Response.trim()
+								+ "]");
 						p_Response = "";
 					} else {
-						System.out.println("XML Request to send [" + strRequestString + "]");
+						log.debug("XML Request to send [" + strRequestString + "]");
 						reqLength = strRequestString.length();
 						Formatter lenString = Utilities.getRequestLenthin9digit(reqLength);
 						strRequestString = lenString + strRequestString;
-						System.out.println("Request to:" + strRequestString);
+						log.debug("Request to:" + strRequestString);
 						outToServer.write(strRequestString.getBytes());
 						outToServer.flush();
 						Client.setSoTimeout(10000);
 						in = Client.getInputStream();
 						reader = new InputStreamReader(in);
 
-						System.out.println("bef while" + Client.getReceiveBufferSize());
+						log.debug("bef while" + Client.getReceiveBufferSize());
 						char[] cbuf1 = new char[Client.getReceiveBufferSize() + 1];
 						reader.read(cbuf1, 0, 9);
 
@@ -141,23 +142,23 @@ public class TcpConnecter {
 							resLength += a;
 						}
 
-						System.out.println("Received data from server [" + resLength.trim() + "]");
+						log.debug("Received data from server [" + resLength.trim() + "]");
 
 						int intResLength = 0;
 						try {
 							intResLength = Integer.parseInt(resLength.trim());
 						} catch (NumberFormatException e) {
-							System.out.println("server closed the Socket connection so read Len:" + e.getMessage());
+							log.debug("server closed the Socket connection so read Len:" + e.getMessage());
 							return "";
 						}
 
-						System.out.println("resLength [" + intResLength + "]");
+						log.debug("resLength [" + intResLength + "]");
 
 						char[] cbuf2 = new char[Client.getReceiveBufferSize() + 1];
 						reader.read(cbuf2, 0, intResLength);
 						/*int i = -1;
 						 * while ((i = in.read()) > -1) {
-							System.out.println(i);
+							log.debug(i);
 							p_Response += (char) i;
 						
 						}*/
@@ -167,21 +168,28 @@ public class TcpConnecter {
 
 						}
 
-						System.out.println("DATA IS READ FROM CHANNELS SUCCESFULY,Actual response is : ["
-								+ p_Response.trim() + "]");
+						log.debug("DATA IS READ FROM CHANNELS SUCCESFULY,Actual response is : [" + p_Response.trim()
+								+ "]");
 
-						Client.close();
 					}
 				}
 
 				/*} catch (Exception e) {
-					e.printStackTrace();
+					log.error(e.getStackTrace());;
 				
 				}*/
 			} else {
-				System.out.println("connection not established");
+				log.debug("connection not established");
 			}
 
+		}
+		try {
+
+		}
+
+		finally {
+			log.debug("Closed connection");
+			Client.close();
 		}
 		return p_Response;
 	}
