@@ -8,8 +8,10 @@
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>demo1.date14</param-value>
-        </init-param>
+           </init-param>
         <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
+        
     </servlet>
     <servlet-mapping>
         <servlet-name>Jersey Web Application</servlet-name>

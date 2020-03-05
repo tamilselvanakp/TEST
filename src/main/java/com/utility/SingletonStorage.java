@@ -3,6 +3,7 @@ package com.utility;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -53,6 +54,16 @@ public class SingletonStorage {
 	private static SingletonStorage instance = null;
 
 	private SingletonStorage() {
+	}
+
+	static PriorityBlockingQueue<String> l_HttpAsyncRequestQueue = new PriorityBlockingQueue<>();
+
+	public PriorityBlockingQueue<String> getL_HttpAsyncRequestQueue() {
+		return l_HttpAsyncRequestQueue;
+	}
+
+	public void setL_HttpAsyncRequestQueue(PriorityBlockingQueue<String> l_HttpAsyncRequestQueue) {
+		SingletonStorage.l_HttpAsyncRequestQueue = l_HttpAsyncRequestQueue;
 	}
 
 	public static SingletonStorage getSingletonInstances() {

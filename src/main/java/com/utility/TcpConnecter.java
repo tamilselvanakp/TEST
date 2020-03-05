@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Formatter;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 
@@ -28,20 +30,46 @@ public class TcpConnecter {
 	static String prefix = "";
 	static CustomException o_customexception = new CustomException();
 	static InputStreamReader reader = null;
+	static String Responsestr = "";
 
-	public static String sendTcpClientRequest(String TcpIP, int TcpPort, String Channel_name, String entityName,
-			String xml_ip, boolean isReqcontainRegrequest)
+	public static String sendTcpClientRequest(final String TcpIP, final int TcpPort, String Channel_name,
+			String entityName, final String xml_ip, final boolean isReqcontainRegrequest)
 			throws NumberFormatException, SocketTimeoutException, IOException, Exception {
-		if (Channel_name.equalsIgnoreCase("HLR")) {
 
+		ExecutorService sendTcpExceuter = Executors.newFixedThreadPool(5);
+
+		if (Channel_name.equalsIgnoreCase("HLR")) {
+			Responsestr = "";
 			log.debug("Inside sendTcpClientRequest");
-			return makeTCPconnection(TcpIP.trim(), TcpPort, xml_ip, isReqcontainRegrequest);
+			/*sendTcpExceuter.execute(new Runnable()*/
+			new Thread() {
+				public void run() {
+
+					try {
+
+						Responsestr = makeTCPconnection(TcpIP.trim(), TcpPort, xml_ip, isReqcontainRegrequest);
+						log.info("receiver resp::::--" + Responsestr);
+
+					} catch (NumberFormatException | IOException e) {
+
+						e.printStackTrace();
+						log.error("!!!!!!!!!!!! Execption" + e.getMessage() + "----" + e.getCause());
+						Responsestr = "";
+						return;
+					}
+
+				}
+			}.start();
+			Thread.currentThread().join(10000);
+			log.info("Returning response :::::" + Responsestr);
+			return Responsestr;
 
 		} else {
 			log.debug("Channel name should be HLR");
 			return "";
 
 		}
+
 	}
 
 	private static String makeTCPconnection(String TcpIP, int TcpPort, String strRequestString, Boolean regReqFlag)
@@ -51,7 +79,7 @@ public class TcpConnecter {
 		String regRequestStr = "<REGISTRATION_REQUEST><HEADER><ENTITY_NAME>Tamil</ENTITY_NAME><CONNECTION_TYPE>0</CONNECTION_TYPE></HEADER></REGISTRATION_REQUEST>";
 
 		Client = new Socket();
-
+		Client.setTcpNoDelay(true);
 		sockaddr = new InetSocketAddress(TcpIP.trim(), TcpPort);
 		log.debug("connecting to ..." + sockaddr.toString());
 		if (regReqFlag == true) {
