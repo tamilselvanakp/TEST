@@ -9,8 +9,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Formatter;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 
@@ -18,53 +16,39 @@ import com.exception.handler.CustomException;
 
 public class TcpConnecter {
 	static Logger log = Logger.getLogger(TcpConnecter.class.getName());
-	static Socket Client = null;
-	static SocketAddress sockaddr = null;
-	static boolean IsSocketCreated = false;
-	static String p_Response = "";
-	static OutputStream outToServer = null;
-	static InputStream in = null;
-	static String strRequestString = "";
-	static String newStringFormat = "";
-	static int retry = 1;
-	static String prefix = "";
+
+	// static String strRequestString = "";
+	// static String newStringFormat = "";
+	// static int retry = 1;
+	// static String prefix = "";
 	static CustomException o_customexception = new CustomException();
-	static InputStreamReader reader = null;
+
 	static String Responsestr = "";
 
 	public static String sendTcpClientRequest(final String TcpIP, final int TcpPort, String Channel_name,
 			String entityName, final String xml_ip, final boolean isReqcontainRegrequest)
 			throws NumberFormatException, SocketTimeoutException, IOException, Exception {
 
-		ExecutorService sendTcpExceuter = Executors.newFixedThreadPool(5);
-
 		if (Channel_name.equalsIgnoreCase("HLR")) {
 			Responsestr = "";
 			log.debug("Inside sendTcpClientRequest");
 			/*sendTcpExceuter.execute(new Runnable()*/
-			new Thread() {
-				public void run() {
 
-					try {
+			try {
 
-						Responsestr = makeTCPconnection(TcpIP.trim(), TcpPort, xml_ip, isReqcontainRegrequest);
-						log.info("receiver resp::::--" + Responsestr);
+				return Responsestr = makeTCPconnection(TcpIP.trim(), TcpPort, xml_ip, isReqcontainRegrequest);
 
-					} catch (NumberFormatException | IOException e) {
+			} catch (NumberFormatException | IOException e) {
 
-						e.printStackTrace();
-						log.error("!!!!!!!!!!!! Execption" + e.getMessage() + "----" + e.getCause());
-						Responsestr = "";
-						return;
-					}
+				e.printStackTrace();
+				log.error("!!!!!!!!!!!! Execption" + e.getMessage() + "----" + e.getCause());
+				return Responsestr = "";
 
-				}
-			}.start();
-			Thread.currentThread().join(10000);
-			log.info("Returning response :::::" + Responsestr);
-			return Responsestr;
+			}
 
-		} else {
+		} else
+
+		{
 			log.debug("Channel name should be HLR");
 			return "";
 
@@ -76,12 +60,20 @@ public class TcpConnecter {
 			throws NumberFormatException, IOException, SocketTimeoutException {
 		int noOfReq = 0;
 		int reqLength = 0;
+		String p_Response = "";
+		InputStreamReader reader = null;
+		InputStream in = null;
+		Socket Client = null;
+		boolean IsSocketCreated = false;
+		OutputStream outToServer = null;
 		String regRequestStr = "<REGISTRATION_REQUEST><HEADER><ENTITY_NAME>Tamil</ENTITY_NAME><CONNECTION_TYPE>0</CONNECTION_TYPE></HEADER></REGISTRATION_REQUEST>";
 
 		Client = new Socket();
 		Client.setTcpNoDelay(true);
+		SocketAddress sockaddr = null;
 		sockaddr = new InetSocketAddress(TcpIP.trim(), TcpPort);
 		log.debug("connecting to ..." + sockaddr.toString());
+		log.debug("Sending request with count  to ...[ " + noOfReq + "]");
 		if (regReqFlag == true) {
 
 			noOfReq = 2;
@@ -91,6 +83,7 @@ public class TcpConnecter {
 
 		// try {
 		Client.connect(sockaddr, 1000);
+		log.info("Client name getInetAddress:" + Client.getInetAddress());
 		if (Client.isConnected()) {
 			IsSocketCreated = true;
 			log.debug("connection established");
@@ -106,7 +99,7 @@ public class TcpConnecter {
 				outToServer = Client.getOutputStream();
 				for (int j = 0; j < noOfReq; j++) {
 					if (j == 0 && noOfReq == 2) {
-
+						log.info("Client name getInetAddress 1 :" + Client.getInetAddress());
 						reqLength = regRequestStr.length();
 						Formatter lenString = Utilities.getRequestLenthin9digit(reqLength);
 						regRequestStr = lenString + regRequestStr;
@@ -128,6 +121,7 @@ public class TcpConnecter {
 						for (char a : cbuf1) {
 							resLength += a;
 						}
+						log.info("Client name getInetAddress 2:" + Client.getInetAddress());
 						int intResLength = Integer.parseInt(resLength.trim());
 
 						log.debug("resLength [" + intResLength + "]");
@@ -150,6 +144,7 @@ public class TcpConnecter {
 								+ "]");
 						p_Response = "";
 					} else {
+						log.info("Client name getInetAddress 4:" + Client.getInetAddress());
 						log.debug("XML Request to send [" + strRequestString + "]");
 						reqLength = strRequestString.length();
 						Formatter lenString = Utilities.getRequestLenthin9digit(reqLength);
@@ -195,6 +190,7 @@ public class TcpConnecter {
 							p_Response += a;
 
 						}
+						log.info("Client name getInetAddress: 5" + Client.getInetAddress());
 
 						log.debug("DATA IS READ FROM CHANNELS SUCCESFULY,Actual response is : [" + p_Response.trim()
 								+ "]");
